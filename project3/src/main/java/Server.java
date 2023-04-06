@@ -56,8 +56,7 @@ public class Server{
 	
 
 		class ClientThread extends Thread{
-			
-		
+
 			Socket connection;
 			int count;
 			ObjectInputStream in;
