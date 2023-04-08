@@ -22,6 +22,7 @@ public class Server{
 	
 	
 	Server(Consumer<Serializable> call){
+	
 		callback = call;
 		server = new TheServer();
 		server.start();

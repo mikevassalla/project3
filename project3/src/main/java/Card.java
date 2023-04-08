@@ -1,14 +1,10 @@
-import javafx.scene.image.ImageView;
-
 public class Card {
     private char suit;
     private int value;
-    private ImageView card;
 
-    public Card(char suit, int value, ImageView card) {
+    public Card(char suit, int value) {
         this.suit = suit;
         this.value = value;
-        this.card = card;
     }
 
     public char getSuit() {
@@ -20,17 +16,12 @@ public class Card {
     }
 
     // Defines the suites DO WE NEED KING/QUEEN
-    public char getSuites() {
-        return this.suit;
+    public static char[] getSuites() {
+        return new char[] {'C', 'D', 'H', 'S'};
     }
 
-    //Getter for value of card
-    public int getValues() {
-        return this.value;
-    }
-    
-    //Getter for card
-    public ImageView getImage() {
-    	return this.card;
+    // Defines the values of the cards
+    public static int[] getValues() {
+        return new int[] {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
     }
 }
