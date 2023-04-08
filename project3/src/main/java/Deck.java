@@ -1,6 +1,9 @@
 import java.util.ArrayList;
 import java.util.Collections;
 
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+
 public class Deck {
     private ArrayList<Card> deck;
     private final char[] suits = {'C', 'D', 'H', 'S'};
@@ -16,7 +19,10 @@ public class Deck {
         deck = new ArrayList<Card>();
         for (char suit : suits) {
             for (int value : values) {
-                deck.add(new Card(suit, value));
+            	String t = suit + String.valueOf(value);
+            	Image temp = new Image(t);
+        		ImageView card = new ImageView(temp);
+                deck.add(new Card(suit, value, card));
             }
         }
     }
@@ -32,5 +38,9 @@ public class Deck {
             System.out.println("Deck is empty, cannot deal card.");
         }
         return deck.remove(0);
+    }
+    
+    ArrayList<Card> getDeck() {
+    	return deck;
     }
 }

@@ -14,7 +14,12 @@ import javafx.scene.control.ListView;
  */
 
 public class Server{
-
+	//Player p1 = new Player();
+	//Player p2 = new Player();
+	//Player dealer = new Player();
+	//Deck deck = new Deck();
+	
+	
 	int count = 1;	
 	ArrayList<ClientThread> clients = new ArrayList<ClientThread>();
 	TheServer server;
@@ -22,7 +27,6 @@ public class Server{
 	
 	
 	Server(Consumer<Serializable> call){
-	
 		callback = call;
 		server = new TheServer();
 		server.start();
@@ -30,20 +34,18 @@ public class Server{
 	
 	
 	public class TheServer extends Thread{
-		
 		public void run() {
-		
+			//dealer.dealerAddCards(deck.getDeck());
+			
 			try(ServerSocket mysocket = new ServerSocket(5555);){
 		    System.out.println("Server is waiting for a client!");
 		  
 			
 		    while(true) {
-		
 				ClientThread c = new ClientThread(mysocket.accept(), count);
 				callback.accept("client has connected to server: " + "client #" + count);
 				clients.add(c);
 				c.start();
-				
 				count++;
 				
 			    }
@@ -77,8 +79,7 @@ public class Server{
 				}
 			}
 			
-			public void run(){
-					
+			public void run(){	
 				try {
 					in = new ObjectInputStream(connection.getInputStream());
 					out = new ObjectOutputStream(connection.getOutputStream());
@@ -95,7 +96,6 @@ public class Server{
 					    	String data = in.readObject().toString();
 					    	callback.accept("client: " + count + " sent: " + data);
 					    	updateClients("client #"+count+" said: "+data);
-					    	
 					    	}
 					    catch(Exception e) {
 					    	callback.accept("OOOOPPs...Something wrong with the socket from client: " + count + "....closing down!");

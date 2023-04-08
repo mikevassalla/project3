@@ -16,16 +16,21 @@ public class Client extends Thread{
 	ObjectInputStream in;
 	
 	private Consumer<Serializable> callback;
+	private String ip;
+	private int port;
 	
-	Client(Consumer<Serializable> call){
 	
-		callback = call;
+	//Client(Consumer<Serializable> call,
+	Client(String ip, int port){
+		this.ip = ip;
+		this.port = port;
+		//callback = call;
 	}
 	
 	public void run() {
 		
 		try {
-		socketClient= new Socket("127.0.0.1",5555);
+		socketClient= new Socket(ip,port);
 	    out = new ObjectOutputStream(socketClient.getOutputStream());
 	    in = new ObjectInputStream(socketClient.getInputStream());
 	    socketClient.setTcpNoDelay(true);
@@ -35,8 +40,8 @@ public class Client extends Thread{
 		while(true) {
 			 
 			try {
-			String message = in.readObject().toString();
-			callback.accept(message);
+			//String message = in.readObject().toString();
+			//callback.accept(message);
 			}
 			catch(Exception e) {}
 		}
