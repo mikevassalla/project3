@@ -18,10 +18,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
@@ -39,8 +36,10 @@ public class GuiClient extends Application{
 	Server serverConnection;
 	Client clientConnection;
 	
-	TextField ip = new TextField("IP");
-	TextField port = new TextField("Port");
+	TextField ip = new TextField("");
+	TextField port = new TextField("");
+
+
 	Button b1 = new Button("Connect");
 	Button tempB1 = new Button("Auto Join");
 	BorderPane root = new BorderPane();
@@ -53,6 +52,8 @@ public class GuiClient extends Application{
 	
 	ListView<String> listItems, listItems2;
 	ArrayList<ImageView> p1Cards = new ArrayList<>(initializeCards());
+
+	private int wager = 1;
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -85,6 +86,7 @@ public class GuiClient extends Application{
 		
 		b1.setOnAction(e->{	
 			try {
+				// Sets the width and height of the ip label.
 				clientConnection = new Client(ip.getText(), Integer.parseInt(port.getText()), data ->{
 					
 				});
@@ -128,7 +130,8 @@ public class GuiClient extends Application{
 			Platform.exit();
 	        System.exit(0);
 		});
-		 
+
+		primaryStage.setMaximized(true);
 		primaryStage.setScene(createClientGui());
 		primaryStage.setTitle("Client");	
 		primaryStage.show();
@@ -136,8 +139,36 @@ public class GuiClient extends Application{
 	}
 	
 	public Scene createClientGui() {
+
+		ip.setFocusTraversable(false);
+		port.setMaxWidth(200); // set the maximum width to 200 pixels
+		port.setPromptText("Enter port here");
+		port.setAlignment(Pos.CENTER);
+		port.setFocusTraversable(false);
+
+		ip.setMaxWidth(300); // set the maximum width to 200 pixels
+		ip.setPromptText("Enter IP here");
+		ip.setAlignment(Pos.CENTER);
+
+
 		clientBox = new VBox(10, ip, port, b1, tempB1);
-		clientBox.setStyle("-fx-background-color: blue");
+		clientBox.setAlignment(Pos.CENTER);
+		Image blueBoi = new Image("casino.jpg");
+		BackgroundImage backgroundCasino = new BackgroundImage(
+				blueBoi,
+				BackgroundRepeat.NO_REPEAT,
+				BackgroundRepeat.NO_REPEAT,
+				BackgroundPosition.CENTER,
+				new BackgroundSize(
+						1.0, // Width relative to the node
+						1.0, // Height relative to the node
+						true, // Width is relative
+						true, // Height is relative
+						false, // Cover the entire area of the node
+						false // Do not preserve the aspect ratio of the image
+				)
+		);
+		clientBox.setBackground(new Background(backgroundCasino));
 		return new Scene(clientBox, 400, 300);
 	}
 	
@@ -147,72 +178,142 @@ public class GuiClient extends Application{
 		ArrayList<ImageView> p2Cards = new ArrayList<>(initializeCards());
 		
 		//Top row
-		Label d = new Label("Dealer");
+		Label dealerLabel = new Label("Dealer");
 		p1Win.setText("Winnings p1: 0");
 		Label p2Win = new Label("Winnings p2: 0");
 		HBox dCards = new HBox(dealerCards.get(0), dealerCards.get(1), dealerCards.get(2));
-		VBox dDisplay = new VBox(d, dCards);
+		dCards.setSpacing(20); // Set spacing between the cards
+		VBox dDisplay = new VBox(dealerLabel, dCards);
+		dDisplay.setSpacing(10); // Set spacing between the dealer label and the cards
 		dDisplay.setAlignment(Pos.CENTER);
 		HBox top = new HBox(p1Win, dDisplay, p2Win);
+		top.setSpacing(10); // Set spacing between the amount winnings and the cards
+		top.setPadding(new Insets(10, 0, 30, 0)); // set top, right, bottom, left padding
 		
 		//Mid row
 		Label p1Label = new Label("Player 1");
 		Label p2Label = new Label("Player 2");
 		
 		HBox p1CardsIMG = new HBox(p1Cards.get(0), p1Cards.get(1), p1Cards.get(2));
+		p1CardsIMG.setSpacing(20); // Set spacing between the cards
 		HBox p2CardsIMG = new HBox(p2Cards.get(0), p2Cards.get(1), p2Cards.get(2));
-		
+		p2CardsIMG.setSpacing(20); // Set spacing between the cards
+
+
 		VBox p1Display = new VBox(p1Label, p1CardsIMG);
 		p1Display.setAlignment(Pos.CENTER);
+		p1Display.setSpacing(10); // Set spacing between the label and the cards vertical
+
 		VBox p2Display = new VBox(p2Label, p2CardsIMG);
 		p2Display.setAlignment(Pos.CENTER);
-		
+		p2Display.setSpacing(10); // Set spacing between the label and the cards vertical
+
 		HBox middle = new HBox(p1Display, p2Display);
-		
+		middle.setSpacing(50); // Set spacing between the label and the cards vertical
+
+
+
 		//Bottom row
 		//Ante Col
 		Label ante = new Label("Ante");
-		Label anteWager = new Label("Wager: 5");
-		Button anteDown = new Button("Down");
-		Button anteUp = new Button("Up");
-		HBox wagerBoxAnte = new HBox(anteDown, anteWager, anteUp);
+		TextField anteAmount = new TextField();
+		anteAmount.setText(String.valueOf(wager));
+		anteAmount.setEditable(false);
+		Button anteDown = new Button("-");
+		anteDown.setOnAction(event -> {
+			if (wager > 1) {
+				wager--;
+				anteAmount.setText(String.valueOf(wager));
+			}
+		});
+		Button anteUp = new Button("+");
+		anteUp.setOnAction(event -> {
+			if (wager < 10) {
+				wager++;
+				anteAmount.setText(String.valueOf(wager));
+			}
+		});
+		HBox wagerBoxAnte = new HBox(anteDown, anteAmount, anteUp);
+		wagerBoxAnte.setSpacing(10); // Set spacing between the ante buttons
+
 		wagerBoxAnte.setAlignment(Pos.CENTER);
+
 		VBox AnteDisplay = new VBox(ante, wagerBoxAnte);
 		AnteDisplay.setAlignment(Pos.CENTER);
-		
+		AnteDisplay.setSpacing(10); // Set spacing between the label and the wager buttons.
+
 		//play col
-		Label totalPot = new Label("Total Pot: 1 MILLY");
+		TextField totalPotAmount = new TextField();
+		totalPotAmount.setEditable(false);
+		totalPotAmount.setStyle("-fx-background-color: transparent;");
+		Label totalPot = new Label("Total Pot:");
+
+		VBox potInfo = new VBox(totalPot, totalPotAmount);
+		potInfo.setAlignment(Pos.CENTER);
 		Button playBtn = new Button("Play");
 		playBtn.setOnAction(e->{
 			clientConnection.send("1");
 		});
 		Button foldBtn = new Button("Fold");
 		HBox btns = new HBox(playBtn, foldBtn);
+		btns.setSpacing(30); // Set spacing play button and fold button
 		btns.setAlignment(Pos.CENTER);
-		VBox playDisplay = new VBox(totalPot, btns);
+
+		VBox playDisplay = new VBox(potInfo, btns);
 		playDisplay.setAlignment(Pos.CENTER);
-		
-		Label pair = new Label("pair");
-		Label pairWager = new Label("Wager: 5");
-		Button pairDown = new Button("Down");
-		Button pairUp = new Button("Up");
-		HBox wagerBoxPair = new HBox(pairDown, pairWager, pairUp);
+		playDisplay.setSpacing(10); // Set spacing between the label and the wager buttons.
+
+
+		Label pair = new Label("Pair");
+		TextField pairAmount = new TextField();
+		pairAmount.setText(String.valueOf(wager));
+		pairAmount.setEditable(false);
+		Button pairDown = new Button("-");
+		pairDown.setOnAction(event -> {
+			if (wager > 1) {
+				wager--;
+				pairAmount.setText(String.valueOf(wager));
+			}
+		});
+		Button pairUp = new Button("+");
+		pairUp.setOnAction(event -> {
+			if (wager < 10) {
+				wager++;
+				pairAmount.setText(String.valueOf(wager));
+			}
+		});
+
+		HBox wagerBoxPair = new HBox(pairDown, pairAmount, pairUp);
+		wagerBoxPair.setSpacing(10); // Set spacing between all the wager buttons
 		wagerBoxPair.setAlignment(Pos.CENTER);
 		VBox pairDisplay = new VBox(pair, wagerBoxPair);
 		pairDisplay.setAlignment(Pos.CENTER);
-		
+		pairDisplay.setSpacing(10); // Set spacing between the label and the wager buttons.
+
+
 		HBox bottom = new HBox(AnteDisplay, playDisplay, pairDisplay);
-		
+		bottom.setSpacing(30); // Set spacing play button and fold button
+
+
+		// Set alignment for all nodes in the VBox
 		top.setAlignment(Pos.CENTER);
 		middle.setAlignment(Pos.CENTER);
 		bottom.setAlignment(Pos.CENTER);
+
+		// Set margin between middle and bottom nodes
+		VBox.setMargin(bottom, new Insets(100, 0, 0, 0));
+
+		// Create the VBox
 		VBox game = new VBox(top, middle, bottom);
 		game.setAlignment(Pos.CENTER);
 		m.getItems().add(exitBtn);
 		menu.getMenus().addAll(m);
 		root.setTop(menu);
 		root.setCenter(game);
-		return new Scene(root, 400, 300);
+		root.getStylesheets().add(getClass().getResource("ClientBlue.css").toExternalForm());
+		return new Scene(root, 700, 700);
+
+
 	}
 	
 	ArrayList<ImageView> initializeCards(){
