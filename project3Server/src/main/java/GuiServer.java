@@ -179,8 +179,8 @@ public class GuiServer extends Application{
 					}
 					
 					if(responses == 2) {
-						int p1Points = evalCards(p1.cards);
-						int p2Points = evalCards(p2.cards);
+						int p1Points = evalCardsPairPlus(p1.cards);
+						int p2Points = evalCardsPairPlus(p2.cards);
 						System.out.println(p1Points);
 						System.out.println(p2Points);
 						responses = 0;
@@ -216,7 +216,7 @@ public class GuiServer extends Application{
 		primaryStage.show();
 
 	}
-	public int evalCards(ArrayList<Card> c) {
+	public int evalCardsPairPlus(ArrayList<Card> c) {
 		Collections.sort(c);
 		if(c.get(0).getValue() == c.get(1).getValue() - 1 && c.get(1).getValue() == c.get(2).getValue() - 1) {
 			if(c.get(0).getSuit() == c.get(1).getSuit() && c.get(1).getSuit() == c.get(2).getSuit()) {
@@ -240,6 +240,48 @@ public class GuiServer extends Application{
 		}
 		return 0;
 	}
-	
+
+	/*Here is the ranking of poker hands from lowest to highest:
+
+	High card: The hand contains no pair or any other combination of cards. The hand is ranked by the highest card, with an ace being the highest and a two being the lowest.
+	One pair: The hand contains two cards of the same rank.
+	Two pair: The hand contains two different pairs of cards.
+	Three of a kind: The hand contains three cards of the same rank.
+			Straight: The hand contains five cards of sequential rank, but not of the same suit.
+			Flush: The hand contains any five cards of the same suit, but not in sequence.
+	Full house: The hand contains three cards of one rank and two cards of another rank.
+	Four of a kind: The hand contains four cards of the same rank.
+	Straight flush: The hand contains five cards of sequential rank, all of the same suit.
+	Royal flush: The hand contains the Ace, King, Queen, Jack, and 10 of the same suit.*/
+
+	public int compareHand(ArrayList<Card> playerHand, ArrayList<Card> dealerHand) {
+		int playerRank = evalCardsPairPlus(playerHand);
+		int dealerRank = evalCardsPairPlus(dealerHand);
+
+		if (playerRank > dealerRank) {
+			// Player wins
+			return 1;
+		} else if (playerRank < dealerRank) {
+			// Dealer wins
+			return -1;
+		} else {
+			// Same rank, compare high card
+			Collections.sort(playerHand);
+			Collections.sort(dealerHand);
+			for (int i = 2; i >= 0; i--) {
+				if (playerHand.get(i).getValue() > dealerHand.get(i).getValue()) {
+					// Player wins
+					return 1;
+				} else if (playerHand.get(i).getValue() < dealerHand.get(i).getValue()) {
+					// Dealer wins
+					return -1;
+				}
+			}
+			// Tie
+			return 0;
+		}
+	}
+
 }
+
 
