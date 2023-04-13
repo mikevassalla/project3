@@ -1,5 +1,8 @@
 import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 
 import javafx.application.Application;
@@ -27,7 +30,14 @@ public class GuiServer extends Application{
 	Client clientConnection;
 	private final ObservableList<Player> gameResults = FXCollections.observableArrayList();
 	private TableView<Player> tableView;
-
+	private int clientsCount;
+	
+	Player p1 = new Player();
+	Player p2 = new Player();
+	Player dealer = new Player();
+	Deck deck = new Deck();
+	
+	int responses = 0;
 
 	ListView<String> listItems;
 	int count = 0;
@@ -134,9 +144,57 @@ public class GuiServer extends Application{
 		pane.setLeft(leftPane);
 		primaryStage.setScene(new Scene(pane, 500, 200));
 
-		serverConnection = new Server(data -> {
+		serverConnection = new Server(x -> {
+			Responses r = (Responses) x;
 			Platform.runLater(()->{
-				listItems.getItems().add(data.toString());
+				if(r.getResponse() == 1) {
+					//Updating Client Info
+					listItems.getItems().add(r.getMessage());
+					clientsCount++;
+					clientTot.setText(Integer.toString(clientsCount));
+				}
+				else if(r.getResponse() == 2) {
+					//Deal Cards
+					responses++;
+					if(responses == 2) {
+						deck.shuffleCards();
+						p1.playerAddCards(deck.dealCard());
+						p2.playerAddCards(deck.dealCard());
+						dealer.playerAddCards(deck.dealCard());
+						serverConnection.sendResponse(new Responses(2, p1.cards), "p1");
+						serverConnection.sendResponse(new Responses(2, p2.cards), "p2");
+						responses = 0;
+					}
+				}
+				else if(r.getResponse() == 3) {
+					//Calculating Points
+					responses++;
+					if(r.getPlayer().equals("p1")) {
+						p1.setAnte(r.getAnte());
+						p1.setPair(r.getPair());
+					}
+					else if(r.getPlayer().equals("p2")) {
+						p1.setAnte(r.getAnte());
+						p1.setPair(r.getPair());
+					}
+					
+					if(responses == 2) {
+						int p1Points = evalCards(p1.cards);
+						int p2Points = evalCards(p2.cards);
+						System.out.println(p1Points);
+						System.out.println(p2Points);
+						responses = 0;
+					}
+					
+				}
+				else if(r.getResponse() == 400) {
+					listItems.getItems().add(r.getMessage());
+					clientsCount--;
+					clientTot.setText(Integer.toString(clientsCount));
+				}
+				else if(r.getResponse() == 404) {
+					listItems.getItems().add(r.getMessage());
+				}
 			});
 		});
 
@@ -158,5 +216,30 @@ public class GuiServer extends Application{
 		primaryStage.show();
 
 	}
-
+	public int evalCards(ArrayList<Card> c) {
+		Collections.sort(c);
+		if(c.get(0).getValue() == c.get(1).getValue() - 1 && c.get(1).getValue() == c.get(2).getValue() - 1) {
+			if(c.get(0).getSuit() == c.get(1).getSuit() && c.get(1).getSuit() == c.get(2).getSuit()) {
+				//Straight Flush
+				return 5;
+			}
+			//Straight
+			return 3;
+		}
+		else if(c.get(0).getValue() == c.get(1).getValue() && c.get(1).getValue() == c.get(2).getValue()) {
+			//3 of a kind
+			return 4;
+		}
+		if(c.get(0).getSuit() == c.get(1).getSuit() && c.get(1).getSuit() == c.get(2).getSuit()) {
+			//Flush
+			return 2;
+		}
+		else if(c.get(0).getValue() == c.get(1).getValue() || c.get(1).getValue() == c.get(2).getValue() || c.get(0).getValue() == c.get(2).getValue()) {
+			//Pair
+			return 1;
+		}
+		return 0;
+	}
+	
 }
+

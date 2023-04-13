@@ -1,6 +1,6 @@
 import java.io.Serializable;
 
-public class Card implements Serializable{
+public class Card implements Serializable, Comparable<Card> {
 	private static final long serialVersionUID = 1L;
     private char suit;
     private int value;
@@ -11,7 +11,12 @@ public class Card implements Serializable{
         this.value = value;
         this.cardName = suit + Integer.toString(value) + ".png";
     }
-
+    
+    @Override
+    public int compareTo(Card otherCard) {
+        return Integer.compare(this.value, otherCard.value);
+    }
+    
     public char getSuit() {
         return suit;
     }
