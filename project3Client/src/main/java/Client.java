@@ -50,7 +50,7 @@ public class Client extends Thread{
 	
     }
 	
-	public void send(String data) {
+	public void send(Responses data) {
 		
 		try {
 			out.writeObject(data);

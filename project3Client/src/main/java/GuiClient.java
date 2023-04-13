@@ -52,8 +52,20 @@ public class GuiClient extends Application{
 	
 	ListView<String> listItems, listItems2;
 	ArrayList<ImageView> p1Cards = new ArrayList<>(initializeCards());
-
-	private int wager = 1;
+	
+	private String player;
+	private int anteWager = 5;
+	private int pairWager = 5;
+	String pfSwitch;
+	
+	//Buttons
+	Button anteDown = new Button("-");
+	Button anteUp = new Button("+");
+	Button playBtn = new Button("Play");
+	Button foldBtn = new Button("Fold");
+	Button dealBtn = new Button("Deal");
+	Button pairDown = new Button("-");
+	Button pairUp = new Button("+");
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -106,6 +118,14 @@ public class GuiClient extends Application{
 					Platform.runLater(() -> {
 			            Responses r = (Responses) x;
 			            if(r.getResponse() == 1) {
+			            	//Enable Buttons
+			            	anteDown.setDisable(false);
+			        		anteUp.setDisable(false);
+			        		dealBtn.setDisable(false);
+			        		pairDown.setDisable(false);
+			        		pairUp.setDisable(false);
+			            }
+			            else if(r.getResponse() == 2) {
 			            	Image temp = new Image(r.cards.get(0).getImageName());
 			                ImageView card = new ImageView(temp);
 			            	p1Cards.get(0).setImage(card.getImage());
@@ -115,6 +135,11 @@ public class GuiClient extends Application{
 			            	temp = new Image(r.cards.get(2).getImageName());
 			                card = new ImageView(temp);
 			            	p1Cards.get(2).setImage(card.getImage());
+			            	playBtn.setDisable(false);
+			            	foldBtn.setDisable(false);
+			            }
+			            else if(r.getResponse() == 20) {
+			            	player = r.getMessage();
 			            }
 			        });		
 				});
@@ -122,6 +147,7 @@ public class GuiClient extends Application{
 				primaryStage.setScene(clientGameScene());
 			}
 			catch(Exception m) {
+				System.out.println(m);
 				//TO DO
 			}
 		});
@@ -173,6 +199,14 @@ public class GuiClient extends Application{
 	}
 	
 	public Scene clientGameScene() {
+		anteDown.setDisable(true);
+		anteUp.setDisable(true);
+		playBtn.setDisable(true);
+		foldBtn.setDisable(true);
+		dealBtn.setDisable(true);
+		pairDown.setDisable(true);
+		pairUp.setDisable(true);
+
 		ArrayList<ImageView> dealerCards = new ArrayList<>(initializeCards());
 		//ArrayList<ImageView> p1Cards = new ArrayList<>(initializeCards());
 		ArrayList<ImageView> p2Cards = new ArrayList<>(initializeCards());
@@ -217,20 +251,20 @@ public class GuiClient extends Application{
 		//Ante Col
 		Label ante = new Label("Ante");
 		TextField anteAmount = new TextField();
-		anteAmount.setText(String.valueOf(wager));
+		anteAmount.setText(String.valueOf(anteWager));
 		anteAmount.setEditable(false);
-		Button anteDown = new Button("-");
+		//Button anteDown = new Button("-");
 		anteDown.setOnAction(event -> {
-			if (wager > 1) {
-				wager--;
-				anteAmount.setText(String.valueOf(wager));
+			if (anteWager > 5) {
+				anteWager--;
+				anteAmount.setText(String.valueOf(anteWager));
 			}
 		});
-		Button anteUp = new Button("+");
+		//Button anteUp = new Button("+");
 		anteUp.setOnAction(event -> {
-			if (wager < 10) {
-				wager++;
-				anteAmount.setText(String.valueOf(wager));
+			if (anteWager < 25) {
+				anteWager++;
+				anteAmount.setText(String.valueOf(anteWager));
 			}
 		});
 		HBox wagerBoxAnte = new HBox(anteDown, anteAmount, anteUp);
@@ -243,43 +277,46 @@ public class GuiClient extends Application{
 		AnteDisplay.setSpacing(10); // Set spacing between the label and the wager buttons.
 
 		//play col
-		TextField totalPotAmount = new TextField();
-		totalPotAmount.setEditable(false);
-		totalPotAmount.setStyle("-fx-background-color: transparent;");
-		Label totalPot = new Label("Total Pot:");
+		//totalPotAmount.setStyle("-fx-background-color: transparent;");
 
-		VBox potInfo = new VBox(totalPot, totalPotAmount);
-		potInfo.setAlignment(Pos.CENTER);
-		Button playBtn = new Button("Play");
 		playBtn.setOnAction(e->{
-			clientConnection.send("1");
+			clientConnection.send(new Responses(3, anteWager, pairWager, player));
 		});
-		Button foldBtn = new Button("Fold");
-		HBox btns = new HBox(playBtn, foldBtn);
-		btns.setSpacing(30); // Set spacing play button and fold button
-		btns.setAlignment(Pos.CENTER);
+		
+		foldBtn.setOnAction(e->{
+			clientConnection.send(new Responses(1));
+		});
+		
+		dealBtn.setOnAction(e->{
+			clientConnection.send(new Responses(2, anteWager, pairWager, player));
+			anteDown.setDisable(true);
+    		anteUp.setDisable(true);
+    		dealBtn.setDisable(true);
+    		pairDown.setDisable(true);
+    		pairUp.setDisable(true);
+		});
 
-		VBox playDisplay = new VBox(potInfo, btns);
+		VBox playDisplay = new VBox(playBtn, foldBtn, dealBtn);
 		playDisplay.setAlignment(Pos.CENTER);
 		playDisplay.setSpacing(10); // Set spacing between the label and the wager buttons.
 
 
 		Label pair = new Label("Pair");
 		TextField pairAmount = new TextField();
-		pairAmount.setText(String.valueOf(wager));
+		pairAmount.setText(String.valueOf(pairWager));
 		pairAmount.setEditable(false);
-		Button pairDown = new Button("-");
+		//Button pairDown = new Button("-");
 		pairDown.setOnAction(event -> {
-			if (wager > 1) {
-				wager--;
-				pairAmount.setText(String.valueOf(wager));
+			if (pairWager > 5) {
+				pairWager--;
+				pairAmount.setText(String.valueOf(pairWager));
 			}
 		});
-		Button pairUp = new Button("+");
+		//Button pairUp = new Button("+");
 		pairUp.setOnAction(event -> {
-			if (wager < 10) {
-				wager++;
-				pairAmount.setText(String.valueOf(wager));
+			if (pairWager < 25) {
+				pairWager++;
+				pairAmount.setText(String.valueOf(pairWager));
 			}
 		});
 
@@ -322,12 +359,12 @@ public class GuiClient extends Application{
 		ImageView c2 = new ImageView(new Image("back.png"));
 		ImageView c3 = new ImageView(new Image("back.png"));
 		
-		c1.setFitHeight(100);
-		c1.setFitWidth(50);
-		c2.setFitHeight(100);
-		c2.setFitWidth(50);
-		c3.setFitHeight(100);
-		c3.setFitWidth(50);
+		c1.setFitHeight(120);
+		c1.setFitWidth(75);
+		c2.setFitHeight(120);
+		c2.setFitWidth(75);
+		c3.setFitHeight(120);
+		c3.setFitWidth(75);
 		
 		temp.add(c1);
 		temp.add(c2);
