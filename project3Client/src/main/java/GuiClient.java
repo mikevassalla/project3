@@ -24,35 +24,20 @@ import javafx.stage.WindowEvent;
 
 public class GuiClient extends Application{
 
-	
-	TextField s1,s2,s3,s4, c1;
-	Button serverChoice,clientChoice;
-	HashMap<String, Scene> sceneMap;
-	GridPane grid;
-	HBox buttonBox;
 	VBox clientBox;
-	Scene startScene;
-	BorderPane startPane;
-	Server serverConnection;
 	Client clientConnection;
 	
 	TextField ip = new TextField("");
 	TextField port = new TextField("");
-
-
 	Button b1 = new Button("Connect");
 	Button tempB1 = new Button("Auto Join");
 	BorderPane root = new BorderPane();
-	
 	MenuBar menu = new MenuBar();
 	Menu m = new Menu("Menu");
 	MenuItem exitBtn = new MenuItem("Exit");
-	
-	Label p1Win = new Label();
-	
-	ListView<String> listItems, listItems2;
 	ArrayList<ImageView> p1Cards = new ArrayList<>(initializeCards());
-	
+	int playWin = 0;
+	int opWin = 0;
 	private String player;
 	private int anteWager = 5;
 	private int pairWager = 5;
@@ -210,23 +195,35 @@ public class GuiClient extends Application{
 		ArrayList<ImageView> dealerCards = new ArrayList<>(initializeCards());
 		//ArrayList<ImageView> p1Cards = new ArrayList<>(initializeCards());
 		ArrayList<ImageView> p2Cards = new ArrayList<>(initializeCards());
-		
+
+		//
 		//Top row
+		//
 		Label dealerLabel = new Label("Dealer");
-		p1Win.setText("Winnings p1: 0");
-		Label p2Win = new Label("Winnings p2: 0");
+		Label p1Win = new Label("Your Winnings");
+		Label p2Win = new Label("Opponents Winnings");
+		TextField yourWinnings = new TextField(Integer.toString(playWin));
+		yourWinnings.setEditable(false);
+		yourWinnings.setPrefWidth(50); // set the preferred width to 50 pixels
+		TextField opWinnings = new TextField(Integer.toString(opWin));
+		opWinnings.setEditable(false);
+		opWinnings.setPrefWidth(50); // set the preferred width to 50 pixels
+
+
+		VBox yourDisplay = new VBox(p1Win, yourWinnings);
+		VBox opDisplay = new VBox(p2Win, opWinnings);
 		HBox dCards = new HBox(dealerCards.get(0), dealerCards.get(1), dealerCards.get(2));
 		dCards.setSpacing(20); // Set spacing between the cards
-		VBox dDisplay = new VBox(dealerLabel, dCards);
-		dDisplay.setSpacing(10); // Set spacing between the dealer label and the cards
-		dDisplay.setAlignment(Pos.CENTER);
-		HBox top = new HBox(p1Win, dDisplay, p2Win);
-		top.setSpacing(10); // Set spacing between the amount winnings and the cards
+		VBox dealerDisplay = new VBox(dealerLabel, dCards);
+		dealerDisplay.setSpacing(10); // Set spacing between the dealer label and the cards
+		dealerDisplay.setAlignment(Pos.CENTER);
+		HBox top = new HBox(yourDisplay, dealerDisplay, opDisplay);
+		top.setSpacing(30); // Set spacing between the amount winnings and the cards
 		top.setPadding(new Insets(10, 0, 30, 0)); // set top, right, bottom, left padding
 		
 		//Mid row
-		Label p1Label = new Label("Player 1");
-		Label p2Label = new Label("Player 2");
+		Label p1Label = new Label("You");
+		Label p2Label = new Label("Opponent");
 		
 		HBox p1CardsIMG = new HBox(p1Cards.get(0), p1Cards.get(1), p1Cards.get(2));
 		p1CardsIMG.setSpacing(20); // Set spacing between the cards
@@ -296,7 +293,11 @@ public class GuiClient extends Application{
     		pairUp.setDisable(true);
 		});
 
-		VBox playDisplay = new VBox(playBtn, foldBtn, dealBtn);
+		Label playWagerTxt = new Label("Play Wager");
+		TextField playWagerAmt = new TextField();
+		playWagerAmt.setPrefWidth(50);
+		VBox playDisplay = new VBox(playWagerTxt, playWagerAmt,playBtn, foldBtn, dealBtn);
+
 		playDisplay.setAlignment(Pos.CENTER);
 		playDisplay.setSpacing(10); // Set spacing between the label and the wager buttons.
 
@@ -329,7 +330,7 @@ public class GuiClient extends Application{
 
 
 		HBox bottom = new HBox(AnteDisplay, playDisplay, pairDisplay);
-		bottom.setSpacing(30); // Set spacing play button and fold button
+		bottom.setSpacing(30); // Set spacing play button, fold button and ante button
 
 
 		// Set alignment for all nodes in the VBox
@@ -348,7 +349,8 @@ public class GuiClient extends Application{
 		root.setTop(menu);
 		root.setCenter(game);
 		root.getStylesheets().add(getClass().getResource("ClientBlue.css").toExternalForm());
-		return new Scene(root, 700, 700);
+		Scene scene = new Scene(root, 700, 700);
+		return scene;
 
 
 	}
