@@ -35,6 +35,7 @@ public class GuiClient extends Application{
 	MenuBar menu = new MenuBar();
 	Menu m = new Menu("Menu");
 	MenuItem exitBtn = new MenuItem("Exit");
+	MenuItem themeBtn = new MenuItem("Change Theme");
 	ArrayList<ImageView> p1Cards = new ArrayList<>(initializeCards());
 	int playWin = 0;
 	int opWin = 0;
@@ -51,6 +52,7 @@ public class GuiClient extends Application{
 	Button dealBtn = new Button("Deal");
 	Button pairDown = new Button("-");
 	Button pairUp = new Button("+");
+	private Integer changeTheme;
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -164,6 +166,7 @@ public class GuiClient extends Application{
 
 		clientBox = new VBox(10, ip, port, b1, tempB1);
 		clientBox.setAlignment(Pos.CENTER);
+		changeTheme = 1;
 		Image blueBoi = new Image("casino.jpg");
 		BackgroundImage backgroundCasino = new BackgroundImage(
 				blueBoi,
@@ -339,16 +342,42 @@ public class GuiClient extends Application{
 		bottom.setAlignment(Pos.CENTER);
 
 		// Set margin between middle and bottom nodes
-		VBox.setMargin(bottom, new Insets(100, 0, 0, 0));
+		VBox.setMargin(bottom, new Insets(75, 0, 0, 0));
+
+		System.out.println(changeTheme);
+		//
+		// The following code is to change the theme of the program interface
+		//
+		themeBtn.setOnAction((ActionEvent t) -> {
+			if (changeTheme == 0) {
+				root.getStylesheets().add(getClass().getResource("ClientBlue.css").toExternalForm());
+				changeTheme++;
+				System.out.println(changeTheme);
+			}
+			else if(changeTheme == 1){
+				root.getStylesheets().add(getClass().getResource("gray.css").toExternalForm());
+				changeTheme++;
+				System.out.println(changeTheme);
+			}
+			else if(changeTheme == 2) {
+				root.getStylesheets().add(getClass().getResource("ClientBlue.css").toExternalForm());
+				changeTheme = 0;
+				System.out.println(changeTheme);
+			}
+			else {
+				System.out.println("Wrong");
+			}
+		});
 
 		// Create the VBox
 		VBox game = new VBox(top, middle, bottom);
 		game.setAlignment(Pos.CENTER);
 		m.getItems().add(exitBtn);
+		m.getItems().add(themeBtn);
 		menu.getMenus().addAll(m);
 		root.setTop(menu);
 		root.setCenter(game);
-		root.getStylesheets().add(getClass().getResource("ClientBlue.css").toExternalForm());
+		//root.getStylesheets().add(getClass().getResource("ClientBlue.css").toExternalForm());
 		Scene scene = new Scene(root, 700, 700);
 		return scene;
 
