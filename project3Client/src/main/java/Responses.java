@@ -9,7 +9,8 @@ public class Responses implements Serializable {
     private Object data;
     private int ante;
     private int pair;
-    ArrayList<Card> cards = new ArrayList<>();
+    private ArrayList<Card> cards = new ArrayList<>();
+    ArrayList<String> cs = new ArrayList<>();
 
     public Responses(int response) {
         this.response = response;
@@ -21,6 +22,10 @@ public class Responses implements Serializable {
     public Responses(int response, ArrayList<Card> cards) {
         this.response = response;
         this.cards = cards;
+    }
+    public Responses(int response, ArrayList<String> cs, String n) {
+        this.response = response;
+        this.cs = cs;
     }
     public Responses(int response, int ante, int pair, Integer player) {
     	this.response = response;
@@ -46,7 +51,9 @@ public class Responses implements Serializable {
     public void setMessage(String message) {
         this.message = message;
     }
-
+    public ArrayList<Card> getCards() {
+    	return cards;
+    }
     public Object getData() {
         return data;
     }

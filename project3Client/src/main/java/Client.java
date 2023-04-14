@@ -10,7 +10,7 @@ import javafx.scene.control.Label;
 
 
 
-public class Client extends Thread{
+public class Client extends Thread {
 
 	
 	Socket socketClient;
@@ -32,12 +32,12 @@ public class Client extends Thread{
 	
 	public void run() {
 		try {
-		socketClient= new Socket(ip, port);
+		socketClient = new Socket(ip, port);
 	    out = new ObjectOutputStream(socketClient.getOutputStream());
 	    in = new ObjectInputStream(socketClient.getInputStream());
 	    socketClient.setTcpNoDelay(true);
 		}
-		catch(Exception e) {}
+		catch(Exception e) {System.out.println(e);}
 		
 		while(true) {
 			 
