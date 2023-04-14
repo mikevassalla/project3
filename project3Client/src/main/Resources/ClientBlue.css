@@ -1,0 +1,46 @@
+
+/* Set the background image */
+.root{
+    -fx-background-image: url("blueBoi.png");
+    -fx-background-size: cover;
+    -fx-background-position: center;
+    -fx-background-repeat: no-repeat;
+    -fx-focus-color: -fx-accent;
+    -fx-base: #373e43;
+    -fx-control-inner-background: derive(-fx-base, 35%);
+    -fx-control-inner-background-alt: -fx-control-inner-background;
+    -fx-text-fill: lightgray;
+    -fx-prompt-text-fill: gray;
+    -fx-text-fill: white;
+    -fx-font-family: Arial;
+}
+/* Set the font and color for the text */
+.text {
+    -fx-fill: white;
+}
+
+
+.button {
+    -fx-background-color: lightgray;
+    -fx-background-radius: 15;
+    -fx-background-insets: 0;
+    -fx-font-family: "Arial";
+    -fx-font-weight: bold;
+    -fx-font-size: 9pt;
+    -fx-pref-width: 50px;
+    -fx-pref-height: 40px;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.2), 5, 0, 0, 1);
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-background-color: darkgray;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 8, 0, 0, 2);
+}
+
+.button:pressed {
+    -fx-background-color: #8B0000;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.4), 4, 0, 0, 1);
+}
+
+
