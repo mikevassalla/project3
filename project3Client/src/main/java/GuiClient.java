@@ -294,7 +294,6 @@ public class GuiClient extends Application{
 		middle.setSpacing(50); // Set spacing between the label and the cards vertical
 
 
-
 		//Bottom row
 		//Ante Col
 		Label ante = new Label("Ante");
