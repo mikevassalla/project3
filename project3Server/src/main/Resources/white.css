@@ -1,0 +1,9 @@
+.root {
+    -fx-focus-color: -fx-accent;
+    -fx-base: #FFFFFF;
+    -fx-control-inner-background: derive(-fx-base, 35%);
+    -fx-control-inner-background-alt: -fx-control-inner-background ;
+    -fx-text-fill: black;
+    -fx-prompt-text-fill: white;
+    -fx-font-family: Arial;
+}

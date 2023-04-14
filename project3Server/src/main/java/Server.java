@@ -36,14 +36,15 @@ public class Server{
 			
 		    while(true) {
 				ClientThread c = new ClientThread(mysocket.accept(), count);
-				callback.accept(new Responses(1, "client has connected to server: " + "client #" + count));
 				clients.add(c);
+				callback.accept(new Responses(1, "client has connected to server: " + "client #" + count));
 				c.start();
 				count++;
 				
 			    }
 			}//end of try
 				catch(Exception e) {
+					System.out.println(e);
 					callback.accept(new Responses(404, "Server socket did not launch"));
 				}
 			}//end of while
@@ -91,18 +92,7 @@ public class Server{
 					System.out.println("Streams not open");
 				}
 				
-				updateClients("new client on server: client #"+count);
-				if(count == 2) {
-					//try {
-						try {
-							//Enable Buttons
-							clients.get(0).out.writeObject(new Responses(1));
-							clients.get(0).out.writeObject(new Responses(20, "p1"));
-							clients.get(1).out.writeObject(new Responses(1));
-							clients.get(1).out.writeObject(new Responses(20, "p2"));
-						} catch (IOException e) {
-							e.printStackTrace();
-						}
+				//updateClients("new client on server: client #"+count);
 						/*
 						deck.shuffleCards();
 						p1.playerAddCards(deck.dealCard());
@@ -114,8 +104,7 @@ public class Server{
 						// TODO Auto-generated catch block
 						//m.printStackTrace();
 					//}
-				}
-					
+				callback.accept(new Responses(21));
 				while(true) {
 					try {
 						Responses r = (Responses)in.readObject();
@@ -129,27 +118,14 @@ public class Server{
 				}
 			}//end of run
 		}//end of client thread
-		public void sendResponse(Responses message, String p) {
-			if(p.equals("p1")) {
-				ClientThread t = clients.get(0);
-				try {
-				 t.out.writeObject(message);
-				}
-				catch(Exception e) {
-					System.out.println(e);
-				}
+		public void sendResponse(Responses message, Integer p) {
+			try {
+				clients.get(p).out.writeObject(message);
 			}
-			else if(p.equals("p2")) {
-				ClientThread t = clients.get(1);
-				try {
-				 t.out.writeObject(message);
-				}
-				catch(Exception e) {
-					System.out.println(e);
-				}
+			catch(Exception e) {
+				System.out.println(e);
 			}
 		}
-		
 }
 
 

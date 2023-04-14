@@ -42,15 +42,15 @@ public class Client extends Thread{
 		while(true) {
 			 
 			try {
-			String message = in.readObject().toString();
-			callback.accept(message);
+				Responses r = (Responses) in.readObject();
+				callback.accept(r);
 			}
-			catch(Exception e) {}
+			catch(Exception a) {}
 		}
 	
     }
 	
-	public void send(String data) {
+	public void send(Responses data) {
 		
 		try {
 			out.writeObject(data);

@@ -3,7 +3,7 @@ import java.util.ArrayList;
 
 public class Responses implements Serializable {
 	private static final long serialVersionUID = 1L;
-	private String player;
+	private Integer player;
     private int response;
     private String message;
     private Object data;
@@ -22,14 +22,13 @@ public class Responses implements Serializable {
         this.response = response;
         this.cards = cards;
     }
-    public Responses(int response, int ante, int pair, String player) {
+    public Responses(int response, int ante, int pair, Integer player) {
     	this.response = response;
     	this.ante = ante;
     	this.pair = pair;
     	this.player = player;
     }
-    
-    public String getPlayer() {
+    public Integer getPlayer() {
     	return player;
     }
     public int getResponse() {

@@ -30,15 +30,13 @@ public class GuiServer extends Application{
 	Client clientConnection;
 	private final ObservableList<Player> gameResults = FXCollections.observableArrayList();
 	private TableView<Player> tableView;
-	private int clientsCount;
+	private int clientsCount = 0;
 	
-	Player p1 = new Player();
-	Player p2 = new Player();
-	Player dealer = new Player();
-	Deck deck = new Deck();
+	ArrayList<Player> players = new ArrayList<>();
 	
 	int responses = 0;
-
+	int cc = 0;
+	
 	ListView<String> listItems;
 	int count = 0;
 	public static void main(String[] args) {
@@ -150,42 +148,169 @@ public class GuiServer extends Application{
 				if(r.getResponse() == 1) {
 					//Updating Client Info
 					listItems.getItems().add(r.getMessage());
+					//serverConnection.sendResponse(new Responses(20, Integer.toString(clientsCount)), clientsCount);
 					clientsCount++;
 					clientTot.setText(Integer.toString(clientsCount));
 				}
 				else if(r.getResponse() == 2) {
 					//Deal Cards
-					responses++;
-					if(responses == 2) {
-						deck.shuffleCards();
-						p1.playerAddCards(deck.dealCard());
-						p2.playerAddCards(deck.dealCard());
-						dealer.playerAddCards(deck.dealCard());
-						serverConnection.sendResponse(new Responses(2, p1.cards), "p1");
-						serverConnection.sendResponse(new Responses(2, p2.cards), "p2");
-						responses = 0;
-					}
+					players.get(r.getPlayer()).setAnte(r.getAnte());
+					players.get(r.getPlayer()).setPair(r.getPair());
+					players.get(r.getPlayer()).playerAddCards();
+					System.out.println(players.get(r.getPlayer()).cards.get(0).getImageName() + " " + players.get(r.getPlayer()).cards.get(1).getImageName() + " " + players.get(r.getPlayer()).cards.get(2).getImageName());
+					players.get(r.getPlayer()).dealerAddCards();
+					serverConnection.sendResponse(new Responses(2, players.get(r.getPlayer()).cards), r.getPlayer());
 				}
 				else if(r.getResponse() == 3) {
 					//Calculating Points
-					responses++;
-					if(r.getPlayer().equals("p1")) {
-						p1.setAnte(r.getAnte());
-						p1.setPair(r.getPair());
+					serverConnection.sendResponse(new Responses(3, players.get(r.getPlayer()).dealerCards), r.getPlayer());
+					int winner = compareHand(players.get(r.getPlayer()).cards, players.get(r.getPlayer()).dealerCards);
+					
+					//Tie
+					if(winner == 0) {
+						System.out.println("Tie");
+						
+						int check = evalCards(players.get(r.getPlayer()).cards);
+						int pairCalc = 0;
+						String msg = "Player Wins and";
+						if(check == 5) {
+							msg.concat(" Wins pair plus");
+							pairCalc = 40 * players.get(r.getPlayer()).getPair();
+						}
+						else if(check == 4) {
+							msg.concat(" Wins pair plus");
+							pairCalc = 30 * players.get(r.getPlayer()).getPair();
+						}
+						else if(check == 3) {
+							msg.concat(" Wins pair plus");
+							pairCalc = 6 * players.get(r.getPlayer()).getPair();
+						}
+						else if(check == 2) {
+							msg.concat(" Wins pair plus");
+							pairCalc = 3 * players.get(r.getPlayer()).getPair();
+						}
+						else if(check == 1) {
+							msg.concat(" Wins pair plus");
+							pairCalc = 1 * players.get(r.getPlayer()).getPair();
+						}
+						else if(check == 0) {
+							msg.concat(" Loses pair plus");
+							pairCalc = 0;
+						}
+						
+						serverConnection.sendResponse(new Responses(4, players.get(r.getPlayer()).getAnte(), pairCalc, r.getPlayer()), r.getPlayer());
 					}
-					else if(r.getPlayer().equals("p2")) {
-						p1.setAnte(r.getAnte());
-						p1.setPair(r.getPair());
+					//Player 1 Wins
+					else if(winner == 1) {
+						System.out.println("P1 Win");
+						int anteCalc = players.get(r.getPlayer()).getAnte() * 4;
+						int check = evalCards(players.get(r.getPlayer()).cards);
+						int pairCalc = 0;
+						String msg = "Player Wins and";
+						if(check == 5) {
+							msg.concat(" Wins pair plus");
+							pairCalc = 40 * players.get(r.getPlayer()).getPair();
+						}
+						else if(check == 4) {
+							msg.concat(" Wins pair plus");
+							pairCalc = 30 * players.get(r.getPlayer()).getPair();
+						}
+						else if(check == 3) {
+							msg.concat(" Wins pair plus");
+							pairCalc = 6 * players.get(r.getPlayer()).getPair();
+						}
+						else if(check == 2) {
+							msg.concat(" Wins pair plus");
+							pairCalc = 3 * players.get(r.getPlayer()).getPair();
+						}
+						else if(check == 1) {
+							msg.concat(" Wins pair plus");
+							pairCalc = 1 * players.get(r.getPlayer()).getPair();
+						}
+						else if(check == 0) {
+							msg.concat(" Loses pair plus");
+							pairCalc = 0;
+						}
+						serverConnection.sendResponse(new Responses(5, anteCalc, pairCalc, r.getPlayer()), r.getPlayer());
+					}
+					//Dealer Wins
+					else if(winner == -1) {
+						String msg = "Dealer Wins!";
+						System.out.println("Dealer Win");
+						int pairCalc = 0;
+						int check = evalCards(players.get(r.getPlayer()).cards);
+						if(check == 5) {
+							msg.concat(" Wins pair plus");
+							pairCalc = 40 * players.get(r.getPlayer()).getPair();
+						}
+						else if(check == 4) {
+							msg.concat(" Wins pair plus");
+							pairCalc = 30 * players.get(r.getPlayer()).getPair();
+						}
+						else if(check == 3) {
+							msg.concat(" Wins pair plus");
+							pairCalc = 6 * players.get(r.getPlayer()).getPair();
+						}
+						else if(check == 2) {
+							msg.concat(" Wins pair plus");
+							pairCalc = 3 * players.get(r.getPlayer()).getPair();
+						}
+						else if(check == 1) {
+							msg.concat(" Wins pair plus");
+							pairCalc = 1 * players.get(r.getPlayer()).getPair();
+						}
+						else if(check == 0) {
+							msg.concat(" Loses pair plus");
+							pairCalc = 0;
+						}
+						
+						serverConnection.sendResponse(new Responses(6, 0, pairCalc, r.getPlayer()), r.getPlayer());
+					}
+					//Dealer does not have queen or higher
+					else if(winner == 2) {
+						String msg = "Dealer does not have queen or higher and";
+						System.out.println("Dealer Doesnt have queen or high");
+						
+						int pairCalc = 0;
+						int check = evalCards(players.get(r.getPlayer()).cards);
+						if(check == 5) {
+							msg.concat(" Wins pair plus");
+							pairCalc = 40 * players.get(r.getPlayer()).getPair();
+						}
+						else if(check == 4) {
+							msg.concat(" Wins pair plus");
+							pairCalc = 30 * players.get(r.getPlayer()).getPair();
+						}
+						else if(check == 3) {
+							msg.concat(" Wins pair plus");
+							pairCalc = 6 * players.get(r.getPlayer()).getPair();
+						}
+						else if(check == 2) {
+							msg.concat(" Wins pair plus");
+							pairCalc = 3 * players.get(r.getPlayer()).getPair();
+						}
+						else if(check == 1) {
+							msg.concat(" Wins pair plus");
+							pairCalc = 1 * players.get(r.getPlayer()).getPair();
+						}
+						else if(check == 0) {
+							msg.concat(" Loses pair plus");
+							pairCalc = 0;
+						}
+						
+						serverConnection.sendResponse(new Responses(7, players.get(r.getPlayer()).getAnte(), pairCalc, r.getPlayer()), r.getPlayer());
 					}
 					
-					if(responses == 2) {
-						int p1Points = evalCardsPairPlus(p1.cards);
-						int p2Points = evalCardsPairPlus(p2.cards);
-						System.out.println(p1Points);
-						System.out.println(p2Points);
-						responses = 0;
-					}
+					players.get(r.getPlayer()).resetCards();
 					
+				}
+				else if(r.getResponse() == 4) {
+					
+				}
+				else if(r.getResponse() == 21) {
+					players.add(new Player());
+					serverConnection.sendResponse(new Responses(20, Integer.toString(cc)), cc);
+					cc++;
 				}
 				else if(r.getResponse() == 400) {
 					listItems.getItems().add(r.getMessage());
@@ -216,7 +341,7 @@ public class GuiServer extends Application{
 		primaryStage.show();
 
 	}
-	public int evalCardsPairPlus(ArrayList<Card> c) {
+	public int evalCards(ArrayList<Card> c) {
 		Collections.sort(c);
 		if(c.get(0).getValue() == c.get(1).getValue() - 1 && c.get(1).getValue() == c.get(2).getValue() - 1) {
 			if(c.get(0).getSuit() == c.get(1).getSuit() && c.get(1).getSuit() == c.get(2).getSuit()) {
@@ -240,48 +365,57 @@ public class GuiServer extends Application{
 		}
 		return 0;
 	}
-
+	
 	/*Here is the ranking of poker hands from lowest to highest:
+    High card: The hand contains no pair or any other combination of cards. The hand is ranked by the highest card, with an ace being the highest and a two being the lowest.
+    One pair: The hand contains two cards of the same rank.
+    Two pair: The hand contains two different pairs of cards.
+    Three of a kind: The hand contains three cards of the same rank.
+            Straight: The hand contains five cards of sequential rank, but not of the same suit.
+            Flush: The hand contains any five cards of the same suit, but not in sequence.
+    Full house: The hand contains three cards of one rank and two cards of another rank.
+    Four of a kind: The hand contains four cards of the same rank.
+    Straight flush: The hand contains five cards of sequential rank, all of the same suit.
+    Royal flush: The hand contains the Ace, King, Queen, Jack, and 10 of the same suit.*/
 
-	High card: The hand contains no pair or any other combination of cards. The hand is ranked by the highest card, with an ace being the highest and a two being the lowest.
-	One pair: The hand contains two cards of the same rank.
-	Two pair: The hand contains two different pairs of cards.
-	Three of a kind: The hand contains three cards of the same rank.
-			Straight: The hand contains five cards of sequential rank, but not of the same suit.
-			Flush: The hand contains any five cards of the same suit, but not in sequence.
-	Full house: The hand contains three cards of one rank and two cards of another rank.
-	Four of a kind: The hand contains four cards of the same rank.
-	Straight flush: The hand contains five cards of sequential rank, all of the same suit.
-	Royal flush: The hand contains the Ace, King, Queen, Jack, and 10 of the same suit.*/
-
-	public int compareHand(ArrayList<Card> playerHand, ArrayList<Card> dealerHand) {
-		int playerRank = evalCardsPairPlus(playerHand);
-		int dealerRank = evalCardsPairPlus(dealerHand);
-
-		if (playerRank > dealerRank) {
-			// Player wins
-			return 1;
-		} else if (playerRank < dealerRank) {
-			// Dealer wins
-			return -1;
-		} else {
-			// Same rank, compare high card
-			Collections.sort(playerHand);
-			Collections.sort(dealerHand);
-			for (int i = 2; i >= 0; i--) {
-				if (playerHand.get(i).getValue() > dealerHand.get(i).getValue()) {
-					// Player wins
-					return 1;
-				} else if (playerHand.get(i).getValue() < dealerHand.get(i).getValue()) {
-					// Dealer wins
-					return -1;
-				}
-			}
-			// Tie
-			return 0;
-		}
-	}
-
+    public int compareHand(ArrayList<Card> playerHand, ArrayList<Card> dealerHand) {
+    	/* Tie: 0
+    	 * Player Wins: 1
+    	 * Dealer Wins: -1
+    	 * Dealer does not have queen or high: 2
+    	 */
+    	
+    	
+        int playerRank = evalCards(playerHand);
+        int dealerRank = evalCards(dealerHand);
+        
+        
+        if(dealerHand.get(0).getValue() >= 11 || dealerHand.get(1).getValue() >= 11 || dealerHand.get(2).getValue() >= 11) {
+        	if (playerRank > dealerRank) {
+                // Player wins
+                return 1;
+            } else if (playerRank < dealerRank) {
+                // Dealer wins
+                return -1;
+            } else {
+                // Same rank, compare high card
+                Collections.sort(playerHand);
+                Collections.sort(dealerHand);
+                if (playerHand.get(2).getValue() > dealerHand.get(2).getValue()) {
+                	// Player wins
+                    return 1;
+                } else if (playerHand.get(2).getValue() < dealerHand.get(2).getValue()) {
+                	// Dealer wins
+                    return -1;
+                }
+            }
+            // Tie
+            return 0;
+        }
+        else {
+        	return 2;
+        }
+    }
+	
 }
-
 

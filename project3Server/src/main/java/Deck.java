@@ -5,8 +5,8 @@ import javafx.scene.image.ImageView;
 
 public class Deck {
     private ArrayList<Card> deck;
-    public final char[] suits = {'C', 'D', 'H', 'S'};
-    public final int[] values = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
+    private final char[] suits = {'C', 'D', 'H', 'S'};
+    private final int[] values = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
 
     public Deck() {
         newDeck();
@@ -39,6 +39,13 @@ public class Deck {
         	cards.add(deck.remove(0));
         }
         return cards;
+    }
+    
+    public void add(Card c) {
+    	this.deck.add(c);
+    }
+    public Card remove() {
+    	return this.deck.remove(0);
     }
     
     ArrayList<Card> getDeck() {
