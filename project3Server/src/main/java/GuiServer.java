@@ -17,10 +17,10 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
@@ -47,16 +47,27 @@ public class GuiServer extends Application{
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 
-		tableView = new TableView<>();
+		TableView<Player> tableView = new TableView<>();
+		Font fontC = Font.font("Arial", FontWeight.BOLD, 16);
+
 		TableColumn<Player, String> clientColumn = new TableColumn<>("Client");
+		clientColumn.setStyle("-fx-font-family: " + fontC.getFamily() + "; -fx-font-size: " + fontC.getSize() + "px; -fx-font-weight: " + fontC.getStyle());
 
 		TableColumn<Player, String> resultColumn = new TableColumn<>("Result");
+		resultColumn.setStyle("-fx-font-family: " + fontC.getFamily() + "; -fx-font-size: " + fontC.getSize() + "px; -fx-font-weight: " + fontC.getStyle());
 
 		TableColumn<Player, String> betColumn = new TableColumn<>("Bet");
+		betColumn.setStyle("-fx-font-family: " + fontC.getFamily() + "; -fx-font-size: " + fontC.getSize() + "px; -fx-font-weight: " + fontC.getStyle());
 
 		TableColumn<Player, String> winLossColumn = new TableColumn<>("Win/Loss");
+		winLossColumn.setStyle("-fx-font-family: " + fontC.getFamily() + "; -fx-font-size: " + fontC.getSize() + "px; -fx-font-weight: " + fontC.getStyle());
 
-		// Add the columns to the TableView
+		tableView.getColumns().addAll(clientColumn, resultColumn, betColumn, winLossColumn);
+
+		// Set the table's column resize policy to CONSTRAINED_RESIZE_POLICY
+		tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+		// Add the columns to the table
 		tableView.getColumns().addAll(clientColumn, resultColumn, betColumn, winLossColumn);
 
 		// Add the gameResults to the TableView
@@ -64,16 +75,22 @@ public class GuiServer extends Application{
 
 		// Create a VBox to hold the TableView
 		VBox tableResults = new VBox(tableView);
+		tableResults.setAlignment(Pos.CENTER);
 
 		listItems = new ListView<>();
 		Label clientText = new Label("Client Information");
+		Color colorC = Color.WHITE;
+		clientText.setTextFill(colorC);
+		clientText.setFont(fontC);
 		VBox clientInfo = new VBox(clientText,listItems);
 		clientInfo.setAlignment(Pos.CENTER);
 
 		TextField portField = new TextField();
 		portField.setPromptText("Enter port here");
+		portField.setFont(fontC);
 		portField.setAlignment(Pos.CENTER);
 		Button startListen = new Button("Start Listening");
+		startListen.setFont(fontC);
 
 		// Creates the action for the listening button.
 		startListen.setOnAction(event -> {
@@ -96,6 +113,8 @@ public class GuiServer extends Application{
 		});
 
 		ToggleButton toggleButton = new ToggleButton("Turn On/Off Server");
+		Font fontT = Font.font("Arial", FontWeight.BOLD, 16);
+		toggleButton.setFont(fontT);
 		toggleButton.setStyle("-fx-background-color: red;");
 
 		toggleButton.setOnAction(event -> {
@@ -115,6 +134,10 @@ public class GuiServer extends Application{
 		portCheck.setAlignment(Pos.CENTER);
 
 		Label clientAmount = new Label("Total Clients");
+		Font font = Font.font("Arial", FontWeight.BOLD, 16);
+		Color color = Color.WHITE;
+		clientAmount.setTextFill(color);
+		clientAmount.setFont(font);
 		TextField clientTot = new TextField();
 		clientTot.setEditable(false);
 		clientTot.setText(String.valueOf(count));
@@ -137,11 +160,38 @@ public class GuiServer extends Application{
 		// Set spacing for center pane
 		BorderPane.setMargin(tableResults, new Insets(0, 20, 0, 10)); // 10px spacing on both sides
 
+		Image image = new Image(getClass().getClassLoader().getResourceAsStream("room.jpg"));
+
+
+		ImageView imageView = new ImageView(image);
+		imageView.setFitWidth(Region.USE_PREF_SIZE);
+		imageView.setFitHeight(Region.USE_PREF_SIZE);
+		imageView.setPreserveRatio(true);
+
+		// Create a pane and set its background to the ImageView
+		pane.setBackground(new Background(new BackgroundImage(
+				image,
+				BackgroundRepeat.NO_REPEAT,
+				BackgroundRepeat.NO_REPEAT,
+				BackgroundPosition.CENTER,
+				new BackgroundSize(
+						1.0,
+						1.0,
+						true,
+						true,
+						false,
+						false
+				)
+		)));
+
 		pane.setRight(clientInfo);
 		pane.setCenter(tableResults);
 		pane.setLeft(leftPane);
 		primaryStage.setScene(new Scene(pane, 500, 200));
 
+		toggleButton.selectedProperty().addListener((observable, oldValue, newValue) -> {
+			if (newValue) {
+				toggleButton.setStyle("-fx-background-color: green;");
 		serverConnection = new Server(x -> {
 			Responses r = (Responses) x;
 			Platform.runLater(()->{
@@ -312,7 +362,7 @@ public class GuiServer extends Application{
 							pairCalc = 0;
 						}
 						else {
-							msg += " SHould Not be here";
+							msg += " Should Not be here";
 						}
 						serverConnection.sendResponse(new Responses(8, msg), r.getPlayer());
 						serverConnection.sendResponse(new Responses(7, players.get(r.getPlayer()).getAnte(), pairCalc, r.getPlayer()), r.getPlayer());
@@ -339,12 +389,11 @@ public class GuiServer extends Application{
 				}
 			});
 		});
+			} else {
+				toggleButton.setStyle("-fx-background-color: red;");
+			}
+		});
 
-		//listItems2 = new ListView<String>();
-
-		//c1 = new TextField();
-		//b1 = new Button("Send");
-		//b1.setOnAction(e->{clientConnection.send(c1.getText()); c1.clear();});
 
 		primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
 			@Override
