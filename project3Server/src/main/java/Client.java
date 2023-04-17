@@ -1,3 +1,9 @@
+//  Project 3 -  3 Card Poker
+//  Daniel Beben - Dbeben2 & Micheal Vassalla mvassa4
+//  CS342 Spring 2023
+// This project you will implement a networked version of the popular casino game 3 Card Poker.
+// The focus of the project is event driven programing and networking with Java Sockets.
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;

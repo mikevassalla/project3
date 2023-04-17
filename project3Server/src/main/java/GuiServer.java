@@ -1,15 +1,15 @@
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.net.Socket;
+//  Project 3 -  3 Card Poker
+//  Daniel Beben - Dbeben2 & Micheal Vassalla mvassa4
+//  CS342 Spring 2023
+// This project you will implement a networked version of the popular casino game 3 Card Poker.
+// The focus of the project is event driven programing and networking with Java Sockets.
+
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -28,15 +28,10 @@ import javafx.stage.WindowEvent;
 public class GuiServer extends Application{
 
 	Server serverConnection;
-	Client clientConnection;
-	//private final ObservableList<Player> gameResults = FXCollections.observableArrayList();
 	ObservableList<gridPlayer> clientsList = FXCollections.observableArrayList();
 	private TableView<gridPlayer> tableView = new TableView<>();
 	private int clientsCount = 0;
-	
-	ArrayList<Player> players = new ArrayList<>();
-	
-	int responses = 0;
+	ArrayList<PokerInfo> players = new ArrayList<>();
 	int cc = 0;
 	
 	ListView<String> listItems;
@@ -49,17 +44,16 @@ public class GuiServer extends Application{
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 
-		//TableView<Player> tableView = new TableView<>();
 		Font fontC = Font.font("Arial", FontWeight.BOLD, 16);
 
 		TableColumn<gridPlayer, String> clientColumn = new TableColumn<>("Client");
 		clientColumn.setStyle("-fx-font-family: " + fontC.getFamily() + "; -fx-font-size: " + fontC.getSize() + "px; -fx-font-weight: " + fontC.getStyle());
 		clientColumn.setCellValueFactory(new PropertyValueFactory<gridPlayer, String>("client"));
-		//clientColumn.setPrefWidth(200);
+
 		TableColumn<gridPlayer, String> resultColumn = new TableColumn<>("Win/Loss");
 		resultColumn.setStyle("-fx-font-family: " + fontC.getFamily() + "; -fx-font-size: " + fontC.getSize() + "px; -fx-font-weight: " + fontC.getStyle());
 		resultColumn.setCellValueFactory(new PropertyValueFactory<gridPlayer, String>("wl"));
-		//resultColumn.setPrefWidth(500);
+
 		TableColumn<gridPlayer, String> betColumn = new TableColumn<>("Bet");
 		betColumn.setStyle("-fx-font-family: " + fontC.getFamily() + "; -fx-font-size: " + fontC.getSize() + "px; -fx-font-weight: " + fontC.getStyle());
 		betColumn.setCellValueFactory(new PropertyValueFactory<gridPlayer, String>("bet"));
@@ -76,8 +70,6 @@ public class GuiServer extends Application{
 		// Add the columns to the table
 		tableView.getItems().clear();
         tableView.getItems().addAll(clientsList);
-		// Add the gameResults to the TableView
-		//tableView.setItems(gameResults);
 
 		// Create a VBox to hold the TableView
 		VBox tableResults = new VBox(tableView);
@@ -127,11 +119,9 @@ public class GuiServer extends Application{
 			if (toggleButton.isSelected()) {
 				// Set the style to green when the button is toggled on
 				toggleButton.setStyle("-fx-background-color: green;");
-				System.out.println("Server started.");
 			} else {
 				// Set the style to red when the button is toggled off
 				toggleButton.setStyle("-fx-background-color: red;");
-				System.out.println("Server stopped.");
 			}
 		});
 
@@ -212,7 +202,7 @@ public class GuiServer extends Application{
 					players.get(r.getPlayer()).setAnte(r.getAnte());
 					players.get(r.getPlayer()).setPair(r.getPair());
 					players.get(r.getPlayer()).playerAddCards();
-					//System.out.println(players.get(r.getPlayer()).cards.get(0).getImageName() + " " + players.get(r.getPlayer()).cards.get(1).getImageName() + " " + players.get(r.getPlayer()).cards.get(2).getImageName());
+
 					players.get(r.getPlayer()).dealerAddCards();
 					ArrayList<String> t = convert(players.get(r.getPlayer()).cards);
 					serverConnection.sendResponse(new Responses(2, t, ""), r.getPlayer());
@@ -221,15 +211,12 @@ public class GuiServer extends Application{
 				}
 				else if(r.getResponse() == 3) {
 					//Calculating Points
-					//System.out.println(players.get(r.getPlayer()).dealerCards.get(0).getImageName() + " " + players.get(r.getPlayer()).dealerCards.get(1).getImageName() + " " + players.get(r.getPlayer()).dealerCards.get(2).getImageName());
 					ArrayList<String> n= convert(players.get(r.getPlayer()).dealerCards);
 					serverConnection.sendResponse(new Responses(3, n, ""), r.getPlayer());
 					int winner = compareHand(players.get(r.getPlayer()).cards, players.get(r.getPlayer()).dealerCards);
 					
 					//Tie
 					if(winner == 0) {
-						//System.out.println("Tie");
-						
 						int check = evalCards(players.get(r.getPlayer()).cards);
 						int pairCalc = 0;
 						
@@ -269,7 +256,7 @@ public class GuiServer extends Application{
 					}
 					//Player 1 Wins
 					else if(winner == 1) {
-						//System.out.println("P1 Win");
+
 						int anteCalc = players.get(r.getPlayer()).getAnte() * 4;
 						int check = evalCards(players.get(r.getPlayer()).cards);
 						int pairCalc = 0;
@@ -310,7 +297,7 @@ public class GuiServer extends Application{
 					//Dealer Wins
 					else if(winner == -1) {
 						String msg = "Dealer Wins!";
-						//System.out.println("Dealer Wins and player");
+
 						int pairCalc = 0;
 						int check = evalCards(players.get(r.getPlayer()).cards);
 						if(check == 5) {
@@ -349,8 +336,7 @@ public class GuiServer extends Application{
 					//Dealer does not have queen or higher
 					else if(winner == 2) {
 						String msg = "Dealer does not have queen or higher and";
-						//System.out.println("Dealer Doesnt have queen or high");
-						
+
 						int pairCalc = 0;
 						int check = evalCards(players.get(r.getPlayer()).cards);
 						if(check == 5) {
@@ -393,10 +379,10 @@ public class GuiServer extends Application{
 				else if(r.getResponse() == 5) {
 					clientsList.get(r.getPlayer()).isPlaying = "False";
 					updateGrid(tableView, clientsList);
-					players.set(r.getPlayer(), new Player());
+					players.set(r.getPlayer(), new PokerInfo());
 				}
 				else if(r.getResponse() == 21) { 
-					players.add(new Player());
+					players.add(new PokerInfo());
 					clientsList.add(new gridPlayer());
 					clientsList.get(cc).client = "Client #" + cc;
 					clientsList.get(cc).isPlaying = "True";
@@ -464,20 +450,6 @@ public class GuiServer extends Application{
 		}
 		return n; 
 	}
-	
-	
-	/*Here is the ranking of poker hands from lowest to highest:
-    High card: The hand contains no pair or any other combination of cards. The hand is ranked by the highest card, with an ace being the highest and a two being the lowest.
-    One pair: The hand contains two cards of the same rank.
-    Two pair: The hand contains two different pairs of cards.
-    Three of a kind: The hand contains three cards of the same rank.
-            Straight: The hand contains five cards of sequential rank, but not of the same suit.
-            Flush: The hand contains any five cards of the same suit, but not in sequence.
-    Full house: The hand contains three cards of one rank and two cards of another rank.
-    Four of a kind: The hand contains four cards of the same rank.
-    Straight flush: The hand contains five cards of sequential rank, all of the same suit.
-    Royal flush: The hand contains the Ace, King, Queen, Jack, and 10 of the same suit.*/
-
     public int compareHand(ArrayList<Card> playerHand, ArrayList<Card> dealerHand) {
     	/* Tie: 0
     	 * Player Wins: 1
