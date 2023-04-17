@@ -15,6 +15,7 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
@@ -28,8 +29,9 @@ public class GuiServer extends Application{
 
 	Server serverConnection;
 	Client clientConnection;
-	private final ObservableList<Player> gameResults = FXCollections.observableArrayList();
-	private TableView<Player> tableView;
+	//private final ObservableList<Player> gameResults = FXCollections.observableArrayList();
+	ObservableList<gridPlayer> clientsList = FXCollections.observableArrayList();
+	private TableView<gridPlayer> tableView = new TableView<>();
 	private int clientsCount = 0;
 	
 	ArrayList<Player> players = new ArrayList<>();
@@ -47,31 +49,35 @@ public class GuiServer extends Application{
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 
-		TableView<Player> tableView = new TableView<>();
+		//TableView<Player> tableView = new TableView<>();
 		Font fontC = Font.font("Arial", FontWeight.BOLD, 16);
 
-		TableColumn<Player, String> clientColumn = new TableColumn<>("Client");
+		TableColumn<gridPlayer, String> clientColumn = new TableColumn<>("Client");
 		clientColumn.setStyle("-fx-font-family: " + fontC.getFamily() + "; -fx-font-size: " + fontC.getSize() + "px; -fx-font-weight: " + fontC.getStyle());
-
-		TableColumn<Player, String> resultColumn = new TableColumn<>("Result");
+		clientColumn.setCellValueFactory(new PropertyValueFactory<gridPlayer, String>("client"));
+		//clientColumn.setPrefWidth(200);
+		TableColumn<gridPlayer, String> resultColumn = new TableColumn<>("Win/Loss");
 		resultColumn.setStyle("-fx-font-family: " + fontC.getFamily() + "; -fx-font-size: " + fontC.getSize() + "px; -fx-font-weight: " + fontC.getStyle());
-
-		TableColumn<Player, String> betColumn = new TableColumn<>("Bet");
+		resultColumn.setCellValueFactory(new PropertyValueFactory<gridPlayer, String>("wl"));
+		//resultColumn.setPrefWidth(500);
+		TableColumn<gridPlayer, String> betColumn = new TableColumn<>("Bet");
 		betColumn.setStyle("-fx-font-family: " + fontC.getFamily() + "; -fx-font-size: " + fontC.getSize() + "px; -fx-font-weight: " + fontC.getStyle());
-
-		TableColumn<Player, String> winLossColumn = new TableColumn<>("Win/Loss");
+		betColumn.setCellValueFactory(new PropertyValueFactory<gridPlayer, String>("bet"));
+		
+		TableColumn<gridPlayer, String> winLossColumn = new TableColumn<>("Is Playing");
 		winLossColumn.setStyle("-fx-font-family: " + fontC.getFamily() + "; -fx-font-size: " + fontC.getSize() + "px; -fx-font-weight: " + fontC.getStyle());
-
+		winLossColumn.setCellValueFactory(new PropertyValueFactory<gridPlayer, String>("isPlaying"));
+		
 		tableView.getColumns().addAll(clientColumn, resultColumn, betColumn, winLossColumn);
 
 		// Set the table's column resize policy to CONSTRAINED_RESIZE_POLICY
 		tableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
 		// Add the columns to the table
-		tableView.getColumns().addAll(clientColumn, resultColumn, betColumn, winLossColumn);
-
+		tableView.getItems().clear();
+        tableView.getItems().addAll(clientsList);
 		// Add the gameResults to the TableView
-		tableView.setItems(gameResults);
+		//tableView.setItems(gameResults);
 
 		// Create a VBox to hold the TableView
 		VBox tableResults = new VBox(tableView);
@@ -192,13 +198,12 @@ public class GuiServer extends Application{
 		toggleButton.selectedProperty().addListener((observable, oldValue, newValue) -> {
 			if (newValue) {
 				toggleButton.setStyle("-fx-background-color: green;");
-		serverConnection = new Server(x -> {
+		serverConnection = new Server(Integer.parseInt(portField.getText()), x -> {
 			Responses r = (Responses) x;
 			Platform.runLater(()->{
 				if(r.getResponse() == 1) {
 					//Updating Client Info
 					listItems.getItems().add(r.getMessage());
-					//serverConnection.sendResponse(new Responses(20, Integer.toString(clientsCount)), clientsCount);
 					clientsCount++;
 					clientTot.setText(Integer.toString(clientsCount));
 				}
@@ -211,6 +216,8 @@ public class GuiServer extends Application{
 					players.get(r.getPlayer()).dealerAddCards();
 					ArrayList<String> t = convert(players.get(r.getPlayer()).cards);
 					serverConnection.sendResponse(new Responses(2, t, ""), r.getPlayer());
+					clientsList.get(r.getPlayer()).isPlaying = "True";
+					updateGrid(tableView, clientsList);
 				}
 				else if(r.getResponse() == 3) {
 					//Calculating Points
@@ -252,8 +259,11 @@ public class GuiServer extends Application{
 							pairCalc = 0;
 						}
 						else {
-							msg += "SHould Not be here";
+							msg += "Should Not be here";
 						}
+						clientsList.get(r.getPlayer()).bet = Integer.toString(players.get(r.getPlayer()).getAnte() + players.get(r.getPlayer()).getAnte() + players.get(r.getPlayer()).getPair());
+						clientsList.get(r.getPlayer()).wl = msg + "\n" + Integer.toString(0);
+						updateGrid(tableView, clientsList);
 						serverConnection.sendResponse(new Responses(8, msg), r.getPlayer());
 						serverConnection.sendResponse(new Responses(4, players.get(r.getPlayer()).getAnte(), pairCalc, r.getPlayer()), r.getPlayer());
 					}
@@ -291,6 +301,9 @@ public class GuiServer extends Application{
 						else {
 							msg.concat("SHould Not be here");
 						}
+						clientsList.get(r.getPlayer()).bet = Integer.toString(players.get(r.getPlayer()).getAnte() + players.get(r.getPlayer()).getAnte() + players.get(r.getPlayer()).getPair());
+						clientsList.get(r.getPlayer()).wl = msg + "\n" + Integer.toString(anteCalc + pairCalc);
+						updateGrid(tableView, clientsList);
 						serverConnection.sendResponse(new Responses(8, msg), r.getPlayer());
 						serverConnection.sendResponse(new Responses(5, anteCalc, pairCalc, r.getPlayer()), r.getPlayer());
 					}
@@ -327,6 +340,9 @@ public class GuiServer extends Application{
 						else {
 							msg.concat("SHould Not be here");
 						}
+						clientsList.get(r.getPlayer()).bet = Integer.toString(players.get(r.getPlayer()).getAnte() + players.get(r.getPlayer()).getAnte() + players.get(r.getPlayer()).getPair());
+						clientsList.get(r.getPlayer()).wl = msg + "\n" + Integer.toString(pairCalc - players.get(r.getPlayer()).getAnte() - players.get(r.getPlayer()).getAnte());
+						updateGrid(tableView, clientsList);
 						serverConnection.sendResponse(new Responses(8, msg), r.getPlayer());
 						serverConnection.sendResponse(new Responses(6, 0, pairCalc, r.getPlayer()), r.getPlayer());
 					}
@@ -364,6 +380,9 @@ public class GuiServer extends Application{
 						else {
 							msg += " Should Not be here";
 						}
+						clientsList.get(r.getPlayer()).bet = Integer.toString(players.get(r.getPlayer()).getAnte() + players.get(r.getPlayer()).getAnte() + players.get(r.getPlayer()).getPair());
+						clientsList.get(r.getPlayer()).wl = msg + "\n" + Integer.toString(players.get(r.getPlayer()).getAnte()+ players.get(r.getPlayer()).getAnte() + pairCalc);
+						updateGrid(tableView, clientsList);
 						serverConnection.sendResponse(new Responses(8, msg), r.getPlayer());
 						serverConnection.sendResponse(new Responses(7, players.get(r.getPlayer()).getAnte(), pairCalc, r.getPlayer()), r.getPlayer());
 					}
@@ -371,11 +390,17 @@ public class GuiServer extends Application{
 					players.get(r.getPlayer()).resetCards();
 					
 				}
-				else if(r.getResponse() == 4) {
-					
+				else if(r.getResponse() == 5) {
+					clientsList.get(r.getPlayer()).isPlaying = "False";
+					updateGrid(tableView, clientsList);
+					players.set(r.getPlayer(), new Player());
 				}
 				else if(r.getResponse() == 21) { 
 					players.add(new Player());
+					clientsList.add(new gridPlayer());
+					clientsList.get(cc).client = "Client #" + cc;
+					clientsList.get(cc).isPlaying = "True";
+					updateGrid(tableView, clientsList);
 					serverConnection.sendResponse(new Responses(20, Integer.toString(cc)), cc);
 					cc++;
 				}
@@ -491,5 +516,37 @@ public class GuiServer extends Application{
         	return 2;
         }
     }
-	
+    
+    public void updateGrid(TableView<gridPlayer> t, ObservableList<gridPlayer> g) {
+    	t.getItems().clear();
+        t.getItems().addAll(g);
+    }
+    
+	public class gridPlayer {
+		String client;
+		String wl;
+		String bet;
+		String isPlaying;
+		
+		
+		public gridPlayer() {
+			client = "";
+			wl = "";
+			bet = "";
+			isPlaying = "";
+		}
+		
+		public String getClient() {
+			return client;
+		}
+		public String getWl() {
+			return wl;
+		}
+		public String getBet() {
+			return bet;
+		}
+		public String getIsPlaying() {
+			return isPlaying;
+		}
+	}
 }

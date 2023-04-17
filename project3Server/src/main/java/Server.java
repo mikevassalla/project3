@@ -17,20 +17,19 @@ public class Server{
 	ArrayList<ClientThread> clients = new ArrayList<ClientThread>();
 	TheServer server;
 	private Consumer<Serializable> callback;
+	private Integer port;
 	
-	
-	Server(Consumer<Serializable> call){
+	Server(Integer port, Consumer<Serializable> call){
 		callback = call;
 		server = new TheServer();
 		server.start();
+		this.port = port;
 	}
 	
 	
 	public class TheServer extends Thread{
 		public void run() {
-			//dealer.dealerAddCards(deck.getDeck());
-			
-			try(ServerSocket mysocket = new ServerSocket(5555);){
+			try(ServerSocket mysocket = new ServerSocket(port);){
 		    System.out.println("Server is waiting for a client!");
 		  
 			
@@ -112,7 +111,7 @@ public class Server{
 					}
 					catch(Exception e) {
 						callback.accept(new Responses(400, "Client " + count + " has left!"));
-					    clients.remove(this);
+					    //clients.remove(this);
 					    break;
 					}
 				}
