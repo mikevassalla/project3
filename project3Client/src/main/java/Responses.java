@@ -15,6 +15,10 @@ public class Responses implements Serializable {
     public Responses(int response) {
         this.response = response;
     }
+    public Responses(int response, int player) {
+        this.response = response;
+        this.player = player;
+    }
     public Responses(int response, String message) {
         this.response = response;
         this.message = message;

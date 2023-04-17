@@ -1,6 +1,5 @@
+//import java.awt.Color;
 import java.util.ArrayList;
-import java.util.HashMap;
-
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -10,7 +9,6 @@ import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -18,6 +16,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 
@@ -29,16 +28,17 @@ public class GuiClient extends Application{
 	TextField ip = new TextField("");
 	TextField port = new TextField("");
 	Button b1 = new Button("Connect");
-	Button tempB1 = new Button("Auto Join");
+	//Button tempB1 = new Button("Auto Join");
 	BorderPane root = new BorderPane();
 	MenuBar menu = new MenuBar();
 	Menu m = new Menu("Menu");
 	MenuItem exitBtn = new MenuItem("Exit");
 	MenuItem themeBtn = new MenuItem("Change Theme");
+	MenuItem freshStart = new MenuItem("Restart");
 	ArrayList<ImageView> p1Cards = new ArrayList<>(initializeCards());
 	ArrayList<ImageView> p2Cards = new ArrayList<>(initializeCards());
 	int playWin = 0;
-	int opWin = 0;
+	//int opWin = 0;
 	private Integer player;
 	private int anteWager = 5;
 	private int pairWager = 5;
@@ -53,14 +53,20 @@ public class GuiClient extends Application{
 	Button pairDown = new Button("-");
 	Button pairUp = new Button("+");
 	TextField anteAmount = new TextField();
+	TextField pairAmount = new TextField();
 	private Integer changeTheme = 0;
 	TextField yourWinnings = new TextField(Integer.toString(playWin));
 	HBox p1CardsIMG = new HBox(p1Cards.get(0), p1Cards.get(1), p1Cards.get(2));
 	Image temp = new Image("back.png");
-	//ArrayList<Label> lb;
-	Label gameWin = new Label("");
-	Label roundWon = new Label("");
 	Boolean chk = false;
+	BorderPane root2 = new BorderPane();
+	BorderPane root3 = new BorderPane();
+	VBox organizer;
+	Label qwe = new Label("HEre");
+	Label asd = new Label("Here2");
+	Button playAgain = new Button("Play Again");
+	Stage popupStage = new Stage();
+	Button folded = new Button("Play Again");
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		launch(args);
@@ -68,7 +74,6 @@ public class GuiClient extends Application{
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
-
 		primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
 			@Override
 			public void handle(WindowEvent t) {
@@ -76,7 +81,39 @@ public class GuiClient extends Application{
 				System.exit(0);
 			}
 		});
-
+		
+		playAgain.setOnAction(x -> {popupStage.hide();});
+		folded.setOnAction(x -> {
+			playBtn.setDisable(true);
+			foldBtn.setDisable(true);
+			anteDown.setDisable(false);
+			anteUp.setDisable(false);
+			dealBtn.setDisable(false);
+			pairDown.setDisable(false);
+			pairUp.setDisable(false);
+			
+			playWin = 0;
+			yourWinnings.setText(Integer.toString(playWin));
+			
+			anteAmount.setText("5");
+			anteWager = 5;
+			
+			pairAmount.setText("5");
+			pairWager = 5;
+			
+			Image temp = new Image("back.png");
+			ImageView card = new ImageView(temp);
+			p1Cards.get(0).setImage(card.getImage());
+			p1Cards.get(1).setImage(card.getImage());
+			p1Cards.get(2).setImage(card.getImage());
+			p2Cards.get(0).setImage(card.getImage());
+			p2Cards.get(1).setImage(card.getImage());
+			p2Cards.get(2).setImage(card.getImage());
+			
+			clientConnection.send(new Responses(5, player));
+			popupStage.hide();
+			});
+		
 		b1.setOnAction(e->{
 			try {
 				// Sets the width and height of the ip label.
@@ -122,7 +159,8 @@ public class GuiClient extends Application{
 						}
 						else if(r.getResponse() == 4) {
 							//Tie
-							roundWon.setText("Won 0 this round");
+							//roundWon.setText("Won 0 this round");
+							asd.setText("Won 0 this round");
 
 							playWin += r.getAnte();
 							playWin += r.getAnte();
@@ -136,6 +174,7 @@ public class GuiClient extends Application{
 							dealBtn.setDisable(false);
 							pairDown.setDisable(false);
 							pairUp.setDisable(false);
+							popupStage.show();
 						}
 						else if(r.getResponse() == 5) {
 							//Player 1 Wins
@@ -143,8 +182,9 @@ public class GuiClient extends Application{
 							won += r.getAnte();
 							won += r.getPair();
 
-							roundWon.setText("Won " + won + " this round");
-
+							//roundWon.setText("Won " + won + " this round");
+							asd.setText("Won " + won + " this round");
+							
 							playWin += r.getAnte();
 							playWin += r.getPair();
 							yourWinnings.setText(Integer.toString(playWin));
@@ -155,6 +195,7 @@ public class GuiClient extends Application{
 							dealBtn.setDisable(false);
 							pairDown.setDisable(false);
 							pairUp.setDisable(false);
+							popupStage.show();
 						}
 						else if(r.getResponse() == 6) {
 							//Dealer Wins
@@ -164,7 +205,9 @@ public class GuiClient extends Application{
 							won -= r.getAnte();
 							won += r.getPair();
 
-							roundWon.setText("Won " + won + " this round");
+							//roundWon.setText("Won " + won + " this round");
+							asd.setText("Won " + won + " this round");
+							
 							playWin += r.getPair();
 							yourWinnings.setText(Integer.toString(playWin));
 							playBtn.setDisable(true);
@@ -174,6 +217,8 @@ public class GuiClient extends Application{
 							dealBtn.setDisable(false);
 							pairDown.setDisable(false);
 							pairUp.setDisable(false);
+							popupStage.setScene(clientReplayScene());
+							popupStage.show();
 						}
 						else if(r.getResponse() == 7) {
 							//Dealer does not have queen or higher
@@ -181,8 +226,10 @@ public class GuiClient extends Application{
 							won += r.getAnte();
 							won += r.getAnte();
 							won += r.getPair();
-							roundWon.setText("Won " + won + " this round");
-
+							
+							//roundWon.setText("Won " + won + " this round");
+							asd.setText("Won " + won + " this round");
+							
 							playWin += r.getAnte();
 							playWin += r.getAnte();
 							playWin += r.getPair();
@@ -197,9 +244,11 @@ public class GuiClient extends Application{
 							dealBtn.setDisable(false);
 							pairDown.setDisable(false);
 							pairUp.setDisable(false);
+							popupStage.show();
 						}
 						else if(r.getResponse() == 8) {
-							gameWin.setText(r.getMessage());
+							//gameWin.setText(r.getMessage());
+							qwe.setText(r.getMessage());
 						}
 						else if(r.getResponse() == 20) {
 							System.out.println(r.getMessage());
@@ -208,17 +257,19 @@ public class GuiClient extends Application{
 					});
 				});
 				clientConnection.start();
-				if(chk) {
-					primaryStage.setScene(clientGameScene());
-					primaryStage.setMaximized(true);
-				}
+				primaryStage.setScene(clientGameScene());
+				popupStage.setScene(clientReplayScene());
+				popupStage.initModality(Modality.APPLICATION_MODAL);
+				primaryStage.setMaximized(true);
 			}
 			catch(Exception m) {
 				System.out.println(m);
+				//TO DO
 			}
 		});
 
-
+		/* Auto Join Button for testing purposes
+		 
 		tempB1.setOnAction(e->{
 			try {
 				clientConnection = new Client("127.0.0.1", 5555, x ->{
@@ -263,7 +314,8 @@ public class GuiClient extends Application{
 						}
 						else if(r.getResponse() == 4) {
 							//Tie
-							roundWon.setText("Won 0 this round");
+							//roundWon.setText("Won 0 this round");
+							asd.setText("Won 0 this round");
 
 							playWin += r.getAnte();
 							playWin += r.getAnte();
@@ -277,6 +329,7 @@ public class GuiClient extends Application{
 							dealBtn.setDisable(false);
 							pairDown.setDisable(false);
 							pairUp.setDisable(false);
+							popupStage.show();
 						}
 						else if(r.getResponse() == 5) {
 							//Player 1 Wins
@@ -284,8 +337,9 @@ public class GuiClient extends Application{
 							won += r.getAnte();
 							won += r.getPair();
 
-							roundWon.setText("Won " + won + " this round");
-
+							//roundWon.setText("Won " + won + " this round");
+							asd.setText("Won " + won + " this round");
+							
 							playWin += r.getAnte();
 							playWin += r.getPair();
 							yourWinnings.setText(Integer.toString(playWin));
@@ -296,6 +350,7 @@ public class GuiClient extends Application{
 							dealBtn.setDisable(false);
 							pairDown.setDisable(false);
 							pairUp.setDisable(false);
+							popupStage.show();
 						}
 						else if(r.getResponse() == 6) {
 							//Dealer Wins
@@ -305,7 +360,9 @@ public class GuiClient extends Application{
 							won -= r.getAnte();
 							won += r.getPair();
 
-							roundWon.setText("Won " + won + " this round");
+							//roundWon.setText("Won " + won + " this round");
+							asd.setText("Won " + won + " this round");
+							
 							playWin += r.getPair();
 							yourWinnings.setText(Integer.toString(playWin));
 							playBtn.setDisable(true);
@@ -315,6 +372,8 @@ public class GuiClient extends Application{
 							dealBtn.setDisable(false);
 							pairDown.setDisable(false);
 							pairUp.setDisable(false);
+							popupStage.setScene(clientReplayScene());
+							popupStage.show();
 						}
 						else if(r.getResponse() == 7) {
 							//Dealer does not have queen or higher
@@ -322,8 +381,10 @@ public class GuiClient extends Application{
 							won += r.getAnte();
 							won += r.getAnte();
 							won += r.getPair();
-							roundWon.setText("Won " + won + " this round");
-
+							
+							//roundWon.setText("Won " + won + " this round");
+							asd.setText("Won " + won + " this round");
+							
 							playWin += r.getAnte();
 							playWin += r.getAnte();
 							playWin += r.getPair();
@@ -338,9 +399,11 @@ public class GuiClient extends Application{
 							dealBtn.setDisable(false);
 							pairDown.setDisable(false);
 							pairUp.setDisable(false);
+							popupStage.show();
 						}
 						else if(r.getResponse() == 8) {
-							gameWin.setText(r.getMessage());
+							//gameWin.setText(r.getMessage());
+							qwe.setText(r.getMessage());
 						}
 						else if(r.getResponse() == 20) {
 							System.out.println(r.getMessage());
@@ -350,6 +413,8 @@ public class GuiClient extends Application{
 				});
 				clientConnection.start();
 				primaryStage.setScene(clientGameScene());
+				popupStage.setScene(clientReplayScene());
+				popupStage.initModality(Modality.APPLICATION_MODAL);
 				primaryStage.setMaximized(true);
 			}
 			catch(Exception m) {
@@ -357,17 +422,52 @@ public class GuiClient extends Application{
 				//TO DO
 			}
 		});
-
+		*/
+		
 		exitBtn.setOnAction((ActionEvent t) -> {
 			Platform.exit();
 			System.exit(0);
 		});
+		
+		freshStart.setOnAction((ActionEvent t) -> {
+			
+			playBtn.setDisable(true);
+			foldBtn.setDisable(true);
+			anteDown.setDisable(false);
+			anteUp.setDisable(false);
+			dealBtn.setDisable(false);
+			pairDown.setDisable(false);
+			pairUp.setDisable(false);
+			
+			playWin = 0;
+			yourWinnings.setText(Integer.toString(playWin));
+			
+			anteAmount.setText("5");
+			anteWager = 5;
+			
+			pairAmount.setText("5");
+			pairWager = 5;
+			
+			Image temp = new Image("back.png");
+			ImageView card = new ImageView(temp);
+			p1Cards.get(0).setImage(card.getImage());
+			p1Cards.get(1).setImage(card.getImage());
+			p1Cards.get(2).setImage(card.getImage());
+			p2Cards.get(0).setImage(card.getImage());
+			p2Cards.get(1).setImage(card.getImage());
+			p2Cards.get(2).setImage(card.getImage());
+			
+			clientConnection.send(new Responses(5, player));
+		});
+		
 
 		primaryStage.setScene(createClientGui());
 		primaryStage.setTitle("Client");
 		primaryStage.show();
 	}
 
+	
+	
 	public Scene createClientGui() {
 		ip.setFocusTraversable(false);
 		port.setMaxWidth(100); // set the maximum width to 200 pixels
@@ -380,7 +480,7 @@ public class GuiClient extends Application{
 		ip.setAlignment(Pos.CENTER);
 
 
-		clientBox = new VBox(10, ip, port, b1, tempB1);
+		clientBox = new VBox(10, ip, port, b1);
 		clientBox.setAlignment(Pos.CENTER);
 		changeTheme = 1;
 		Image blueBoi = new Image("casino.jpg");
@@ -401,7 +501,56 @@ public class GuiClient extends Application{
 		clientBox.setBackground(new Background(backgroundCasino));
 		return new Scene(clientBox, 500, 400);
 	}
-
+	
+	
+	
+	
+	
+	
+	
+	public Scene clientReplayScene() {
+		//playAgain = new Button("Play Again?");
+		Button escape = new Button("Exit");
+		escape.setOnAction((ActionEvent t) -> {
+			Platform.exit();
+			System.exit(0);
+		});
+		HBox butones = new HBox(playAgain, escape);
+		butones.setAlignment(Pos.CENTER);
+		butones.setSpacing(10);
+		organizer = new VBox(qwe, asd, butones);
+		organizer.setAlignment(Pos.CENTER);
+		organizer.setSpacing(10);
+		root2 = new BorderPane(organizer);
+		root2.setCenter(organizer);
+		Scene scene = new Scene(root2, 350, 300);
+		return scene;
+	}
+	
+	public Scene foldScene(int val) {
+		Label textStuff = new Label("You lose");
+		Label textStuff2 = new Label("You lost " + val + " this round");
+		Button esp = new Button("Exit");
+		esp.setOnAction((ActionEvent t) -> {
+			Platform.exit();
+			System.exit(0);
+		});
+		
+		
+		HBox butones2 = new HBox(folded, esp);
+		butones2.setAlignment(Pos.CENTER);
+		butones2.setSpacing(10);
+		VBox organizers = new VBox(textStuff, textStuff2, butones2);
+		organizers.setAlignment(Pos.CENTER);
+		organizers.setSpacing(10);
+		root3 = new BorderPane(organizers);
+		root3.setCenter(organizers);
+		Scene scene = new Scene(root3, 350, 300);
+		return scene;
+	}
+	
+	
+	
 	public Scene clientGameScene() {
 		playBtn.setDisable(true);
 		foldBtn.setDisable(true);
@@ -410,8 +559,8 @@ public class GuiClient extends Application{
 		//
 		//Top row
 		//
-		gameWin = new Label("");
-		roundWon = new Label("");
+		//gameWin = new Label("");
+		//roundWon = new Label("");
 		Label p1Win = new Label("Your Winnings");
 		yourWinnings.setEditable(false);
 		yourWinnings.setPrefWidth(50); // set the preferred width to 50 pixels
@@ -419,10 +568,10 @@ public class GuiClient extends Application{
 		VBox yourDisplay = new VBox(p1Win, yourWinnings);
 		//HBox dCards = new HBox(dealerCards.get(0), dealerCards.get(1), dealerCards.get(2));
 		//dCards.setSpacing(20); // Set spacing between the cards
-		VBox dealerDisplay = new VBox(gameWin, roundWon);
-		dealerDisplay.setSpacing(10); // Set spacing between the dealer label and the cards
-		dealerDisplay.setAlignment(Pos.CENTER);
-		HBox top = new HBox(yourDisplay, dealerDisplay);
+		//VBox dealerDisplay = new VBox(gameWin, roundWon);
+		//dealerDisplay.setSpacing(10); // Set spacing between the dealer label and the cards
+		//dealerDisplay.setAlignment(Pos.CENTER);
+		HBox top = new HBox(yourDisplay);
 		top.setSpacing(30); // Set spacing between the amount winnings and the cards
 		top.setPadding(new Insets(10, 0, 30, 0)); // set top, right, bottom, left padding
 
@@ -486,6 +635,8 @@ public class GuiClient extends Application{
 		});
 
 		foldBtn.setOnAction(e->{
+			popupStage.setScene(foldScene(anteWager+anteWager+pairWager));
+			popupStage.show();
 			clientConnection.send(new Responses(4, anteWager, pairWager, player));
 		});
 
@@ -516,7 +667,6 @@ public class GuiClient extends Application{
 
 
 		Label pair = new Label("Pair");
-		TextField pairAmount = new TextField();
 		pairAmount.setText(String.valueOf(pairWager));
 		pairAmount.setEditable(false);
 		//Button pairDown = new Button("-");
@@ -560,16 +710,19 @@ public class GuiClient extends Application{
 		//
 		themeBtn.setOnAction((ActionEvent t) -> {
 			if (changeTheme == 0) {
+				root.getStylesheets().clear();
 				root.getStylesheets().add(getClass().getResource("white.css").toExternalForm());
 				changeTheme++;
 				System.out.println(changeTheme);
 			}
 			else if(changeTheme == 1){
+				root.getStylesheets().clear();
 				root.getStylesheets().add(getClass().getResource("gray.css").toExternalForm());
 				changeTheme++;
 				System.out.println(changeTheme);
 			}
 			else if(changeTheme == 2) {
+				root.getStylesheets().clear();
 				root.getStylesheets().add(getClass().getResource("clientBlue.css").toExternalForm());
 				changeTheme = 0;
 				System.out.println(changeTheme);
@@ -584,10 +737,10 @@ public class GuiClient extends Application{
 		game.setAlignment(Pos.CENTER);
 		m.getItems().add(exitBtn);
 		m.getItems().add(themeBtn);
+		m.getItems().add(freshStart);
 		menu.getMenus().addAll(m);
 		root.setTop(menu);
 		root.setCenter(game);
-		root.getStylesheets().add(getClass().getResource("ClientBlue.css").toExternalForm());
 		Scene scene = new Scene(root, 700, 700);
 
 		return scene;

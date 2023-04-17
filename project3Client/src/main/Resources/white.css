@@ -1,4 +1,6 @@
 .root {
+    -fx-background-color: white;
+    -fx-background-image: none;
     -fx-focus-color: -fx-accent;
     -fx-base: #FFFFFF;
     -fx-control-inner-background: derive(-fx-base, 35%);
