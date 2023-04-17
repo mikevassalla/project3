@@ -1,4 +1,9 @@
-//import java.awt.Color;
+//  Project 3 -  3 Card Poker
+//  Daniel Beben - Dbeben2 & Micheal Vassalla mvassa4
+//  CS342 Spring 2023
+// This project you will implement a networked version of the popular casino game 3 Card Poker.
+// The focus of the project is event driven programing and networking with Java Sockets.
+
 import java.util.ArrayList;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -24,7 +29,6 @@ public class GuiClient extends Application{
 
 	VBox clientBox;
 	Client clientConnection;
-
 	TextField ip = new TextField("");
 	TextField port = new TextField("");
 	Button b1 = new Button("Connect");
@@ -38,11 +42,9 @@ public class GuiClient extends Application{
 	ArrayList<ImageView> p1Cards = new ArrayList<>(initializeCards());
 	ArrayList<ImageView> p2Cards = new ArrayList<>(initializeCards());
 	int playWin = 0;
-	//int opWin = 0;
 	private Integer player;
 	private int anteWager = 5;
 	private int pairWager = 5;
-	String pfSwitch;
 
 	//Buttons
 	Button anteDown = new Button("-");
@@ -58,7 +60,6 @@ public class GuiClient extends Application{
 	TextField yourWinnings = new TextField(Integer.toString(playWin));
 	HBox p1CardsIMG = new HBox(p1Cards.get(0), p1Cards.get(1), p1Cards.get(2));
 	Image temp = new Image("back.png");
-	Boolean chk = false;
 	BorderPane root2 = new BorderPane();
 	BorderPane root3 = new BorderPane();
 	VBox organizer;
@@ -131,9 +132,6 @@ public class GuiClient extends Application{
 						else if(r.getResponse() == 2) {
 							//Sends Player Card
 							temp = new Image(r.cs.get(0));
-							System.out.println(r.cs.get(0));
-							System.out.println(r.cs.get(1));
-							System.out.println(r.cs.get(2));
 							ImageView card = new ImageView(temp);
 							p1Cards.get(0).setImage(card.getImage());
 							temp = new Image(r.cs.get(1));
@@ -159,7 +157,6 @@ public class GuiClient extends Application{
 						}
 						else if(r.getResponse() == 4) {
 							//Tie
-							//roundWon.setText("Won 0 this round");
 							asd.setText("Won 0 this round");
 
 							playWin += r.getAnte();
@@ -182,7 +179,6 @@ public class GuiClient extends Application{
 							won += r.getAnte();
 							won += r.getPair();
 
-							//roundWon.setText("Won " + won + " this round");
 							asd.setText("Won " + won + " this round");
 							
 							playWin += r.getAnte();
@@ -205,7 +201,6 @@ public class GuiClient extends Application{
 							won -= r.getAnte();
 							won += r.getPair();
 
-							//roundWon.setText("Won " + won + " this round");
 							asd.setText("Won " + won + " this round");
 							
 							playWin += r.getPair();
@@ -227,7 +222,6 @@ public class GuiClient extends Application{
 							won += r.getAnte();
 							won += r.getPair();
 							
-							//roundWon.setText("Won " + won + " this round");
 							asd.setText("Won " + won + " this round");
 							
 							playWin += r.getAnte();
@@ -251,7 +245,6 @@ public class GuiClient extends Application{
 							qwe.setText(r.getMessage());
 						}
 						else if(r.getResponse() == 20) {
-							System.out.println(r.getMessage());
 							player = Integer.parseInt(r.getMessage());
 						}
 					});
@@ -263,8 +256,7 @@ public class GuiClient extends Application{
 				primaryStage.setMaximized(true);
 			}
 			catch(Exception m) {
-				System.out.println(m);
-				//TO DO
+				System.out.println(e);
 			}
 		});
 
@@ -502,12 +494,6 @@ public class GuiClient extends Application{
 		return new Scene(clientBox, 500, 400);
 	}
 	
-	
-	
-	
-	
-	
-	
 	public Scene clientReplayScene() {
 		//playAgain = new Button("Play Again?");
 		Button escape = new Button("Exit");
@@ -549,8 +535,6 @@ public class GuiClient extends Application{
 		return scene;
 	}
 	
-	
-	
 	public Scene clientGameScene() {
 		playBtn.setDisable(true);
 		foldBtn.setDisable(true);
@@ -559,18 +543,11 @@ public class GuiClient extends Application{
 		//
 		//Top row
 		//
-		//gameWin = new Label("");
-		//roundWon = new Label("");
 		Label p1Win = new Label("Your Winnings");
 		yourWinnings.setEditable(false);
 		yourWinnings.setPrefWidth(50); // set the preferred width to 50 pixels
 
 		VBox yourDisplay = new VBox(p1Win, yourWinnings);
-		//HBox dCards = new HBox(dealerCards.get(0), dealerCards.get(1), dealerCards.get(2));
-		//dCards.setSpacing(20); // Set spacing between the cards
-		//VBox dealerDisplay = new VBox(gameWin, roundWon);
-		//dealerDisplay.setSpacing(10); // Set spacing between the dealer label and the cards
-		//dealerDisplay.setAlignment(Pos.CENTER);
 		HBox top = new HBox(yourDisplay);
 		top.setSpacing(30); // Set spacing between the amount winnings and the cards
 		top.setPadding(new Insets(10, 0, 30, 0)); // set top, right, bottom, left padding
@@ -579,11 +556,9 @@ public class GuiClient extends Application{
 		Label p1Label = new Label("You");
 		Label p2Label = new Label("Dealer");
 
-
 		p1CardsIMG.setSpacing(20); // Set spacing between the cards
 		HBox p2CardsIMG = new HBox(p2Cards.get(0), p2Cards.get(1), p2Cards.get(2));
 		p2CardsIMG.setSpacing(20); // Set spacing between the cards
-
 
 		VBox p1Display = new VBox(p1Label, p1CardsIMG);
 		p1Display.setAlignment(Pos.CENTER);
@@ -623,10 +598,7 @@ public class GuiClient extends Application{
 
 		VBox AnteDisplay = new VBox(ante, wagerBoxAnte);
 		AnteDisplay.setAlignment(Pos.CENTER);
-		AnteDisplay.setSpacing(10); // Set spacing between the label and the wager buttons.
-
-		//play col
-		//totalPotAmount.setStyle("-fx-background-color: transparent;");
+		AnteDisplay.setSpacing(10); // Set spacing between the label and the wager buttons.;
 
 		playBtn.setOnAction(e->{
 			playWin -= anteWager;
@@ -657,26 +629,20 @@ public class GuiClient extends Application{
 			pairUp.setDisable(true);
 		});
 
-		//Label playWagerTxt = new Label("Play Wager");
-		//TextField playWagerAmt = new TextField();
-		//playWagerAmt.setPrefWidth(50);
 		VBox playDisplay = new VBox(playBtn, foldBtn, dealBtn);
 
 		playDisplay.setAlignment(Pos.CENTER);
 		playDisplay.setSpacing(10); // Set spacing between the label and the wager buttons.
 
-
 		Label pair = new Label("Pair");
 		pairAmount.setText(String.valueOf(pairWager));
 		pairAmount.setEditable(false);
-		//Button pairDown = new Button("-");
 		pairDown.setOnAction(event -> {
 			if (pairWager > 5) {
 				pairWager--;
 				pairAmount.setText(String.valueOf(pairWager));
 			}
 		});
-		//Button pairUp = new Button("+");
 		pairUp.setOnAction(event -> {
 			if (pairWager < 25) {
 				pairWager++;
@@ -704,7 +670,6 @@ public class GuiClient extends Application{
 		// Set margin between middle and bottom nodes
 		VBox.setMargin(bottom, new Insets(75, 0, 0, 0));
 
-		System.out.println(changeTheme);
 		//
 		// The following code is to change the theme of the program interface
 		//
@@ -713,23 +678,18 @@ public class GuiClient extends Application{
 				root.getStylesheets().clear();
 				root.getStylesheets().add(getClass().getResource("white.css").toExternalForm());
 				changeTheme++;
-				System.out.println(changeTheme);
 			}
 			else if(changeTheme == 1){
 				root.getStylesheets().clear();
 				root.getStylesheets().add(getClass().getResource("gray.css").toExternalForm());
 				changeTheme++;
-				System.out.println(changeTheme);
 			}
 			else if(changeTheme == 2) {
 				root.getStylesheets().clear();
 				root.getStylesheets().add(getClass().getResource("clientBlue.css").toExternalForm());
 				changeTheme = 0;
-				System.out.println(changeTheme);
 			}
-			else {
-				System.out.println("Wrong");
-			}
+
 		});
 
 		// Create the VBox
@@ -744,8 +704,6 @@ public class GuiClient extends Application{
 		Scene scene = new Scene(root, 700, 700);
 
 		return scene;
-
-
 	}
 
 	ArrayList<ImageView> initializeCards(){
